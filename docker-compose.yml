@@ -1,0 +1,14 @@
+services:
+  document-rag:
+    build: .
+    container_name: document-rag
+
+    ports:
+      - "8889:8888"
+      - "5500:5500"
+
+    volumes:
+      - .:/workspace
+
+    environment:
+      - PYTHONUNBUFFERED=1
