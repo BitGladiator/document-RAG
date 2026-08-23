@@ -1,0 +1,6 @@
+__pycache__/
+.ipynb_checkpoints/
+.env
+data/documents/*
+data/chroma_data/
+.DS_Store

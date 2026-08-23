@@ -1,0 +1,8 @@
+jupyterlab
+flask
+python-dotenv
+groq
+chromadb
+sentence-transformers
+pypdf
+python-docx
