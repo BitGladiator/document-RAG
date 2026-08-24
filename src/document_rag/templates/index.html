@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Document RAG</title>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 1000px;
+        margin: 40px auto;
+        padding: 0 20px;
+        background: #fafafa;
+      }
+
+      h1 {
+        margin-bottom: 5px;
+      }
+
+      .section {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 20px;
+      }
+
+      button {
+        padding: 9px 14px;
+        cursor: pointer;
+        border: 1px solid #bbb;
+        border-radius: 6px;
+        background: white;
+      }
+
+      button:hover {
+        background: #f0f0f0;
+      }
+
+      input {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+      }
+
+      #question {
+        width: 70%;
+      }
+
+      #answer {
+        white-space: pre-wrap;
+        line-height: 1.6;
+      }
+
+      .document {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .document:last-child {
+        border-bottom: none;
+      }
+
+      .source {
+        background: #f5f5f5;
+        padding: 12px;
+        margin-top: 10px;
+        border-radius: 6px;
+      }
+
+      .status {
+        margin-top: 10px;
+        font-weight: bold;
+      }
+
+      .empty {
+        color: #777;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Document RAG</h1>
+
+    <p>Upload documents and ask questions about them.</p>
+
+    <div class="section">
+      <h2>Upload Document</h2>
+
+      <input type="file" id="file" accept=".pdf,.docx,.txt" />
+
+      <button onclick="uploadDocument()">Upload</button>
+
+      <div id="uploadStatus" class="status"></div>
+    </div>
+
+    <div class="section">
+      <h2>Documents</h2>
+
+      <div id="documents">Loading...</div>
+    </div>
+
+    <div class="section">
+      <h2>Ask a Question</h2>
+
+      <input
+        type="text"
+        id="question"
+        placeholder="Ask something about your documents..."
+      />
+
+      <button onclick="askQuestion()">Ask</button>
+    </div>
+
+    <div class="section">
+      <h2>Answer</h2>
+
+      <div id="answer">No question asked yet.</div>
+    </div>
+
+    <div class="section">
+      <h2>Sources</h2>
+
+      <div id="sources">No sources yet.</div>
+    </div>
+
+    <script>
+      async function uploadDocument() {
+        const fileInput = document.getElementById("file");
+
+        const status = document.getElementById("uploadStatus");
+
+        if (!fileInput.files.length) {
+          status.textContent = "Please select a file.";
+
+          return;
+        }
+
+        const formData = new FormData();
+
+        formData.append("file", fileInput.files[0]);
+
+        status.textContent = "Uploading...";
+
+        try {
+          const response = await fetch("/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            status.textContent = data.error;
+
+            return;
+          }
+
+          status.textContent =
+            `${data.file_name} uploaded successfully. ` +
+            `${data.chunks_indexed} chunks indexed.`;
+
+          fileInput.value = "";
+
+          loadDocuments();
+        } catch (error) {
+          status.textContent = "Upload failed.";
+
+          console.error(error);
+        }
+      }
+
+      async function loadDocuments() {
+        const container = document.getElementById("documents");
+
+        try {
+          const response = await fetch("/documents");
+
+          const data = await response.json();
+
+          container.innerHTML = "";
+
+          if (!data.documents.length) {
+            container.innerHTML =
+              '<div class="empty">No documents indexed.</div>';
+
+            return;
+          }
+
+          for (const doc of data.documents) {
+            const div = document.createElement("div");
+
+            div.className = "document";
+
+            div.innerHTML = `
+        <div>
+            <strong>
+                ${doc.file_name}
+            </strong>
+
+            <br>
+
+            <small>
+                ${doc.file_type}
+                ·
+                ${doc.chunks} chunks
+            </small>
+        </div>
+
+        <button
+            onclick="deleteDocument(
+                '${encodeURIComponent(doc.file_name)}'
+            )">
+            Delete
+        </button>
+    `;
+
+            container.appendChild(div);
+          }
+        } catch (error) {
+          container.textContent = "Could not load documents.";
+
+          console.error(error);
+        }
+      }
+
+      async function deleteDocument(fileName) {
+        if (!confirm("Delete this document?")) {
+          return;
+        }
+
+        try {
+          const response = await fetch(`/documents/${fileName}`, {
+            method: "DELETE",
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            alert(data.error || "Delete failed.");
+
+            return;
+          }
+
+          loadDocuments();
+        } catch (error) {
+          alert("Delete failed.");
+
+          console.error(error);
+        }
+      }
+
+      async function askQuestion() {
+        const question = document.getElementById("question").value;
+
+        const answer = document.getElementById("answer");
+
+        const sources = document.getElementById("sources");
+
+        if (!question.trim()) {
+          answer.textContent = "Please enter a question.";
+
+          return;
+        }
+
+        answer.textContent = "Thinking...";
+
+        sources.innerHTML = "";
+
+        try {
+          const response = await fetch("/ask", {
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json",
+            },
+
+            body: JSON.stringify({
+              query: question,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            answer.textContent = data.error;
+
+            return;
+          }
+
+          answer.textContent = data.answer;
+
+          for (const source of data.sources) {
+            const div = document.createElement("div");
+
+            div.className = "source";
+
+            const metadata = source.metadata;
+
+            div.innerHTML = `
+                <strong>
+                    ${metadata.file_name || "Unknown file"}
+                </strong>
+
+                <br>
+
+                Chunk:
+                ${metadata.chunk_index ?? "Unknown"}
+
+                ${
+                  metadata.page_number
+                    ? `<br>Page: ${metadata.page_number}`
+                    : ""
+                }
+            `;
+
+            sources.appendChild(div);
+          }
+        } catch (error) {
+          answer.textContent = "Request failed.";
+
+          console.error(error);
+        }
+      }
+
+      loadDocuments();
+    </script>
+  </body>
+</html>
