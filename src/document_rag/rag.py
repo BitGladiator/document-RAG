@@ -74,7 +74,7 @@ def build_context(results):
 
         context_parts.append(
             f"""
-SOURCE {i}
+[Source {i}]
 
 File: {file_path}
 Chunk: {chunk_index}
@@ -95,10 +95,16 @@ You are a helpful document question-answering assistant.
 Answer the user's question using ONLY the information
 provided in the context below.
 
-If the answer cannot be found in the context, say:
-"I couldn't find the answer in the provided documents."
+Rules:
 
-Do not invent facts.
+1. Do not use outside knowledge.
+2. If the answer cannot be found in the context, say:
+   "I couldn't find the answer in the provided documents."
+3. Do not invent facts.
+4. Cite factual claims using [Source N].
+5. Only cite sources that actually appear in the context.
+6. Do not invent or guess source numbers.
+7. Keep the answer clear and concise.
 
 Context:
 {context}
@@ -141,9 +147,10 @@ def ask_rag(query, top_k=3):
         "answer": answer,
         "sources": [
             {
+                "source_number": i,
                 "metadata": result["metadata"],
                 "distance": result["distance"]
             }
-            for result in results
+            for i, result in enumerate(results, start=1)
         ]
     }
