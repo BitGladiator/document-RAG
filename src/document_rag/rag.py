@@ -25,7 +25,7 @@ groq_client = Groq(
 )
 
 
-def retrieve(query, top_k=3):
+def retrieve(query, top_k=3, max_distance=0.8):
 
     query_embedding = embedding_model.encode(
         query
@@ -45,10 +45,13 @@ def retrieve(query, top_k=3):
 
     for i in range(len(results["documents"][0])):
 
-        retrieved.append({
+        distance = results["distances"][0][i]
+
+        if distance <= max_distance:
+            retrieved.append({
             "text": results["documents"][0][i],
             "metadata": results["metadatas"][0][i],
-            "distance": results["distances"][0][i]
+            "distance": distance
         })
 
     return retrieved
@@ -135,6 +138,14 @@ def ask_rag(query, top_k=3):
         query=query,
         top_k=top_k
     )
+
+    if not results:
+        return {
+            "answer": (
+                "I couldn't find the answer in the provided documents."
+            ),
+            "sources": []
+        }
 
     context = build_context(results)
 
