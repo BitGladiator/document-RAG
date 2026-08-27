@@ -25,21 +25,33 @@ groq_client = Groq(
 )
 
 
-def retrieve(query, top_k=3, max_distance=0.8):
+def retrieve(
+    query,
+    top_k=3,
+    max_distance=1.0,
+    file_path=None
+):
 
     query_embedding = embedding_model.encode(
         query
     ).tolist()
 
-    results = collection.query(
-        query_embeddings=[query_embedding],
-        n_results=top_k,
-        include=[
-            "documents",
-            "metadatas",
-            "distances"
-        ]
-    )
+    query_kwargs = {
+    "query_embeddings": [query_embedding],
+    "n_results": top_k,
+    "include": [
+        "documents",
+        "metadatas",
+        "distances"
+    ]
+    }
+
+    if file_path:
+        query_kwargs["where"] = {
+          "file_path": file_path
+        }
+
+    results = collection.query(**query_kwargs)
 
     retrieved = []
 
@@ -132,12 +144,17 @@ Answer:
     return response.choices[0].message.content
 
 
-def ask_rag(query, top_k=3):
+def ask_rag(
+    query,
+    top_k=3,
+    file_path=None
+):
 
     results = retrieve(
-        query=query,
-        top_k=top_k
-    )
+    query=query,
+    top_k=top_k,
+    file_path=file_path
+)
 
     if not results:
         return {
