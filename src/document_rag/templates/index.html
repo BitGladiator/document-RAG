@@ -110,6 +110,14 @@
     <div class="section">
       <h2>Ask a Question</h2>
 
+      <label for="documentSelect"> Document: </label>
+
+      <select id="documentSelect">
+        <option value="">All documents</option>
+      </select>
+
+      <br /><br />
+
       <input
         type="text"
         id="question"
@@ -200,27 +208,27 @@
             div.className = "document";
 
             div.innerHTML = `
-        <div>
-            <strong>
-                ${doc.file_name}
-            </strong>
+              <div>
+                  <strong>
+                      ${doc.file_name}
+                  </strong>
 
-            <br>
+                  <br>
 
-            <small>
-                ${doc.file_type}
-                ·
-                ${doc.chunks} chunks
-            </small>
-        </div>
+                  <small>
+                      ${doc.file_type}
+                      ·
+                      ${doc.chunks} chunks
+                  </small>
+              </div>
 
-        <button
-            onclick="deleteDocument(
-                '${encodeURIComponent(doc.file_name)}'
-            )">
-            Delete
-        </button>
-    `;
+              <button
+                  onclick="deleteDocument(
+                      '${encodeURIComponent(doc.file_name)}'
+                  )">
+                  Delete
+              </button>
+          `;
 
             container.appendChild(div);
           }
@@ -256,9 +264,37 @@
           console.error(error);
         }
       }
+      async function loadDocumentSelector() {
+        const select = document.getElementById("documentSelect");
 
+        try {
+          const response = await fetch("/documents");
+
+          const data = await response.json();
+
+          select.innerHTML = `
+            <option value="">All documents</option>
+          `;
+
+          for (const doc of data.documents) {
+            const option = document.createElement("option");
+
+            option.value = doc.file_path;
+
+            option.textContent = doc.file_name;
+
+            select.appendChild(option);
+          }
+        } catch (error) {
+          console.error("Could not load document selector:", error);
+        }
+      }
       async function askQuestion() {
         const question = document.getElementById("question").value;
+
+        const documentSelect = document.getElementById("documentSelect");
+
+        const selectedFile = documentSelect.value;
 
         const answer = document.getElementById("answer");
 
@@ -284,6 +320,7 @@
 
             body: JSON.stringify({
               query: question,
+              file_path: selectedFile || null,
             }),
           });
 
@@ -314,21 +351,21 @@
             const distance = source.distance;
 
             div.innerHTML = `
-    <strong>
-      [Source ${source.source_number}]
-      ${fileName}
-    </strong>
+          <strong>
+            [Source ${source.source_number}]
+            ${fileName}
+          </strong>
 
-    <br>
+          <br>
 
-    <small>
-      Chunk: ${chunk}
+          <small>
+            Chunk: ${chunk}
 
-      ${page ? ` · Page: ${page}` : ""}
+            ${page ? ` · Page: ${page}` : ""}
 
-      ${distance !== undefined ? ` · Distance: ${distance.toFixed(4)}` : ""}
-    </small>
-  `;
+            ${distance !== undefined ? ` · Distance: ${distance.toFixed(4)}` : ""}
+          </small>
+        `;
 
             sources.appendChild(div);
           }
@@ -340,6 +377,7 @@
       }
 
       loadDocuments();
+      loadDocumentSelector();
     </script>
   </body>
 </html>
