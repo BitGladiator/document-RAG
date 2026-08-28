@@ -28,7 +28,7 @@ groq_client = Groq(
 def retrieve(
     query,
     top_k=3,
-    max_distance=1.0,
+    max_distance=2.0,
     file_path=None
 ):
 
@@ -37,51 +37,43 @@ def retrieve(
     ).tolist()
 
     query_kwargs = {
-        "query_embeddings": [query_embedding],
-        "n_results": top_k,
-        "include": [
-            "documents",
-            "metadatas",
-            "distances"
-        ]
+    "query_embeddings": [query_embedding],
+    "n_results": top_k,
+    "include": [
+        "documents",
+        "metadatas",
+        "distances"
+    ]
     }
 
     if file_path:
         query_kwargs["where"] = {
-            "file_path": file_path
+          "file_path": file_path
         }
 
-    results = collection.query(
-        **query_kwargs
-    )
+    results = collection.query(**query_kwargs)
 
     retrieved = []
 
-    for i in range(
-        len(results["documents"][0])
-    ):
+    for i in range(len(results["documents"][0])):
 
-        distance = results["distances"][0][i]
+       distance = results["distances"][0][i]
 
-        if distance <= max_distance:
+       if file_path or distance <= max_distance:
 
-            retrieved.append({
-                "text": results["documents"][0][i],
-                "metadata": results["metadatas"][0][i],
-                "distance": distance
-            })
+        retrieved.append({
+            "text": results["documents"][0][i],
+            "metadata": results["metadatas"][0][i],
+            "distance": distance
+        })
 
     return retrieved
-
 
 def build_context(results):
 
     context_parts = []
 
-    for i, result in enumerate(
-        results,
-        start=1
-    ):
+    for i, result in enumerate(results, start=1):
 
         metadata = result["metadata"]
 
@@ -107,15 +99,10 @@ Content:
 """
         )
 
-    return "\n".join(
-        context_parts
-    )
+    return "\n".join(context_parts)
 
 
-def generate_answer(
-    query,
-    context
-):
+def generate_answer(query, context):
 
     prompt = f"""
 You are a helpful document question-answering assistant.
@@ -164,24 +151,20 @@ def ask_rag(
 ):
 
     results = retrieve(
-        query=query,
-        top_k=top_k,
-        file_path=file_path
-    )
+    query=query,
+    top_k=top_k,
+    file_path=file_path
+)
 
     if not results:
-
         return {
             "answer": (
-                "I couldn't find the answer "
-                "in the provided documents."
+                "I couldn't find the answer in the provided documents."
             ),
             "sources": []
         }
 
-    context = build_context(
-        results
-    )
+    context = build_context(results)
 
     answer = generate_answer(
         query=query,
@@ -196,9 +179,6 @@ def ask_rag(
                 "metadata": result["metadata"],
                 "distance": result["distance"]
             }
-            for i, result in enumerate(
-                results,
-                start=1
-            )
+            for i, result in enumerate(results, start=1)
         ]
     }

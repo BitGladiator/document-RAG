@@ -96,6 +96,7 @@ def list_documents():
         if file_name:
             documents[file_name] = {
                 "file_name": file_name,
+                "file_path": metadata.get("file_path"),
                 "file_type": metadata.get("file_type"),
                 "chunks": documents.get(
                     file_name,

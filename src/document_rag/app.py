@@ -45,7 +45,8 @@ def ask():
         }), 400
 
     result = ask_rag(
-        data["query"]
+      query=data["query"],
+      file_path=data.get("file_path")
     )
 
     return jsonify(result)
