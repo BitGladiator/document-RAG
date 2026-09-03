@@ -83,6 +83,58 @@
       .empty {
         color: #777;
       }
+
+      .source-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+
+      .source-header strong {
+        font-size: 16px;
+      }
+
+      .distance {
+        font-size: 13px;
+        color: #666;
+      }
+
+      .source-file {
+        font-weight: bold;
+        margin-bottom: 4px;
+      }
+
+      .source-meta {
+        font-size: 13px;
+        color: #666;
+      }
+
+      .source {
+        transition: transform 0.15s ease;
+      }
+      .citation {
+        border: none;
+        background: none;
+        padding: 0;
+        margin: 0 3px;
+        font: inherit;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: underline;
+      }
+
+      .citation:hover {
+        opacity: 0.7;
+      }
+
+      .source-highlight {
+        transform: scale(1.01);
+      }
+
+      .source:hover {
+        transform: translateY(-2px);
+      }
     </style>
   </head>
 
@@ -208,27 +260,27 @@
             div.className = "document";
 
             div.innerHTML = `
-              <div>
-                  <strong>
-                      ${doc.file_name}
-                  </strong>
+                    <div>
+                        <strong>
+                            ${doc.file_name}
+                        </strong>
 
-                  <br>
+                        <br>
 
-                  <small>
-                      ${doc.file_type}
-                      ·
-                      ${doc.chunks} chunks
-                  </small>
-              </div>
+                        <small>
+                            ${doc.file_type}
+                            ·
+                            ${doc.chunks} chunks
+                        </small>
+                    </div>
 
-              <button
-                  onclick="deleteDocument(
-                      '${encodeURIComponent(doc.file_name)}'
-                  )">
-                  Delete
-              </button>
-          `;
+                    <button
+                        onclick="deleteDocument(
+                            '${encodeURIComponent(doc.file_name)}'
+                        )">
+                        Delete
+                    </button>
+                `;
 
             container.appendChild(div);
           }
@@ -273,8 +325,8 @@
           const data = await response.json();
 
           select.innerHTML = `
-            <option value="">All documents</option>
-          `;
+                  <option value="">All documents</option>
+                `;
 
           for (const doc of data.documents) {
             const option = document.createElement("option");
@@ -289,26 +341,63 @@
           console.error("Could not load document selector:", error);
         }
       }
-      async function askQuestion() {
-        const question = document.getElementById("question").value;
+      function renderAnswerWithCitations(text) {
+        const answer = document.getElementById("answer");
 
+        answer.innerHTML = "";
+
+        const parts = text.split(/(\[Source\s+\d+\])/g);
+
+        for (const part of parts) {
+          const match = part.match(/^\[Source\s+(\d+)\]$/);
+
+          if (match) {
+            const button = document.createElement("button");
+
+            button.className = "citation";
+            button.type = "button";
+            button.textContent = `Source ${match[1]}`;
+
+            button.addEventListener("click", () => {
+              const source = document.getElementById(`source-${match[1]}`);
+
+              if (source) {
+                source.scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                });
+
+                source.classList.add("source-highlight");
+
+                setTimeout(() => {
+                  source.classList.remove("source-highlight");
+                }, 1200);
+              }
+            });
+
+            answer.appendChild(button);
+          } else {
+            answer.appendChild(document.createTextNode(part));
+          }
+        }
+      }
+      async function askQuestion() {
+        const questionInput = document.getElementById("question");
         const documentSelect = document.getElementById("documentSelect");
 
+        const question = questionInput.value.trim();
         const selectedFile = documentSelect.value;
 
         const answer = document.getElementById("answer");
-
         const sources = document.getElementById("sources");
 
-        if (!question.trim()) {
+        if (!question) {
           answer.textContent = "Please enter a question.";
-
           return;
         }
 
         answer.textContent = "Thinking...";
-
-        sources.innerHTML = "";
+        sources.innerHTML = "Searching documents...";
 
         try {
           const response = await fetch("/ask", {
@@ -327,19 +416,28 @@
           const data = await response.json();
 
           if (!response.ok) {
-            answer.textContent = data.error;
-
+            answer.textContent = data.error || "Something went wrong.";
+            sources.innerHTML = "No sources.";
             return;
           }
 
-          answer.textContent = data.answer;
+          renderAnswerWithCitations(data.answer);
+
+          sources.innerHTML = "";
+
+          if (!data.sources || data.sources.length === 0) {
+            sources.innerHTML =
+              '<div class="empty">No relevant sources found.</div>';
+
+            return;
+          }
 
           for (const source of data.sources) {
             const div = document.createElement("div");
 
             div.className = "source";
-
-            const metadata = source.metadata;
+            div.id = `source-${source.source_number}`;
+            const metadata = source.metadata || {};
 
             const fileName =
               metadata.file_name || metadata.file_path || "Unknown file";
@@ -351,28 +449,36 @@
             const distance = source.distance;
 
             div.innerHTML = `
-          <strong>
-            [Source ${source.source_number}]
-            ${fileName}
-          </strong>
+              <div class="source-header">
+                <strong>
+                  Source ${source.source_number}
+                </strong>
 
-          <br>
+                <span class="distance">
+                  Distance:
+                  ${distance !== undefined ? distance.toFixed(4) : "N/A"}
+                </span>
+              </div>
 
-          <small>
-            Chunk: ${chunk}
+              <div class="source-file">
+                ${fileName}
+              </div>
 
-            ${page ? ` · Page: ${page}` : ""}
-
-            ${distance !== undefined ? ` · Distance: ${distance.toFixed(4)}` : ""}
-          </small>
-        `;
+              <div class="source-meta">
+                Chunk: ${chunk}
+                ${page ? ` · Page: ${page}` : ""}
+              </div>
+            `;
 
             sources.appendChild(div);
           }
         } catch (error) {
-          answer.textContent = "Request failed.";
+          console.error("Ask error:", error);
 
-          console.error(error);
+          answer.textContent = "Request failed. Please try again.";
+
+          sources.innerHTML =
+            '<div class="empty">Could not load sources.</div>';
         }
       }
 
