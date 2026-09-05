@@ -27,6 +27,13 @@ def index_document(file_path):
 
     file_path = Path(file_path)
 
+
+    collection.delete(
+        where={
+            "file_path": str(file_path)
+        }
+    )
+
     pages = load_document(file_path)
 
     documents = []

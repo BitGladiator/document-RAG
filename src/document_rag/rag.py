@@ -27,7 +27,7 @@ groq_client = Groq(
 
 def retrieve(
     query,
-    top_k=3,
+    top_k=5,
     max_distance=2.0,
     file_path=None
 ):
@@ -146,7 +146,7 @@ Answer:
 
 def ask_rag(
     query,
-    top_k=3,
+    top_k=5,
     file_path=None
 ):
 
