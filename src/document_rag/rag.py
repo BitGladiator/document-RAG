@@ -177,7 +177,8 @@ def ask_rag(
             {
                 "source_number": i,
                 "metadata": result["metadata"],
-                "distance": result["distance"]
+                "distance": result["distance"],
+                "text": result["text"]
             }
             for i, result in enumerate(results, start=1)
         ]

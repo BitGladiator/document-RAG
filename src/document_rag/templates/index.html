@@ -83,7 +83,15 @@
       .empty {
         color: #777;
       }
-
+      .source-text {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 6px;
+        background: #f5f5f5;
+        font-size: 14px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+      }
       .source-header {
         display: flex;
         justify-content: space-between;
@@ -447,7 +455,7 @@
             const page = metadata.page_number;
 
             const distance = source.distance;
-
+            const text = source.text || "No source text available.";
             div.innerHTML = `
               <div class="source-header">
                 <strong>
@@ -467,6 +475,9 @@
               <div class="source-meta">
                 Chunk: ${chunk}
                 ${page ? ` · Page: ${page}` : ""}
+              </div>
+              <div class="source-text">
+                ${text}
               </div>
             `;
 
