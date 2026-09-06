@@ -2,7 +2,16 @@ from pathlib import Path
 
 from pypdf import PdfReader
 from docx import Document
+import re
 
+
+def clean_text(text):
+    text = re.sub(r"<EOS>", " ", text, flags=re.IGNORECASE)
+    text = re.sub(r"<pad>", " ", text, flags=re.IGNORECASE)
+
+    text = re.sub(r"\s+", " ", text)
+
+    return text.strip()
 
 def load_pdf(file_path):
     reader = PdfReader(file_path)
@@ -11,7 +20,7 @@ def load_pdf(file_path):
 
     for page_number, page in enumerate(reader.pages, start=1):
         text = page.extract_text() or ""
-
+        text = clean_text(text)
         if text.strip():
             pages.append({
                 "page_number": page_number,
