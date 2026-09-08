@@ -47,7 +47,25 @@ def index_document(file_path):
         text = page["text"]
 
         chunks = chunk_text(text)
+        
+        unique_chunks = []
 
+        for chunk in chunks:
+
+            normalized = " ".join(
+                chunk.lower().split()
+            )
+
+            if normalized not in {
+                " ".join(
+                    existing.lower().split()
+                )
+                for existing in unique_chunks
+            }:
+                unique_chunks.append(chunk)
+
+        chunks = unique_chunks
+        
         for chunk in chunks:
 
             documents.append(chunk)

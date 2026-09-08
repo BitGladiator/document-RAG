@@ -1,27 +1,75 @@
 from pathlib import Path
+import re
 
 from pypdf import PdfReader
 from docx import Document
-import re
 
 
 def clean_text(text):
-    text = re.sub(r"<EOS>", " ", text, flags=re.IGNORECASE)
-    text = re.sub(r"<pad>", " ", text, flags=re.IGNORECASE)
 
-    text = re.sub(r"\s+", " ", text)
+
+    text = re.sub(
+        r"<EOS>",
+        " ",
+        text,
+        flags=re.IGNORECASE
+    )
+
+    text = re.sub(
+        r"<pad>",
+        " ",
+        text,
+        flags=re.IGNORECASE
+    )
+
+   
+    text = re.sub(
+        r"\s+",
+        " ",
+        text
+    )
 
     return text.strip()
 
+def remove_repeated_sentences(text):
+
+    sentences = re.split(
+        r"(?<=[.!?])\s+",
+        text
+    )
+
+    seen = set()
+    unique = []
+
+    for sentence in sentences:
+
+        normalized = " ".join(
+            sentence.lower().split()
+        )
+
+        if normalized and normalized not in seen:
+            seen.add(normalized)
+            unique.append(sentence)
+
+    return " ".join(unique)
+
 def load_pdf(file_path):
+
     reader = PdfReader(file_path)
 
     pages = []
 
-    for page_number, page in enumerate(reader.pages, start=1):
+    for page_number, page in enumerate(
+        reader.pages,
+        start=1
+    ):
+
         text = page.extract_text() or ""
+
         text = clean_text(text)
-        if text.strip():
+        text = remove_repeated_sentences(text)
+        
+        if text:
             pages.append({
                 "page_number": page_number,
                 "text": text
@@ -31,6 +79,7 @@ def load_pdf(file_path):
 
 
 def load_docx(file_path):
+
     document = Document(file_path)
 
     paragraphs = []
@@ -39,6 +88,7 @@ def load_docx(file_path):
         document.paragraphs,
         start=1
     ):
+
         text = paragraph.text.strip()
 
         if text:
@@ -61,12 +111,13 @@ def load_document(file_path):
         return load_docx(file_path)
 
     if file_path.suffix.lower() == ".txt":
+
         text = file_path.read_text(
             encoding="utf-8"
         )
 
         return [{
-            "text": text
+            "text": clean_text(text)
         }]
 
     raise ValueError(
