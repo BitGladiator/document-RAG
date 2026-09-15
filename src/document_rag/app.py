@@ -3,6 +3,11 @@ from pathlib import Path
 from flask import Flask, jsonify, request, render_template
 
 from .rag import ask_rag
+from .memory import (
+    add_interaction,
+    get_history,
+    clear_history
+)
 from .indexing import (
     index_document,
     list_documents,
@@ -49,7 +54,32 @@ def ask():
       file_path=data.get("file_path")
     )
 
+    add_interaction(
+        query=data["query"],
+        answer=result.get("answer", ""),
+        sources=result.get("sources", []),
+        file_path=data.get("file_path")
+    )
+
     return jsonify(result)
+
+
+@app.get("/history")
+def history():
+
+    return jsonify({
+        "history": get_history()
+    })
+
+
+@app.delete("/history")
+def delete_history():
+
+    clear_history()
+
+    return jsonify({
+        "message": "Chat history cleared"
+    })
 
 
 @app.post("/upload")

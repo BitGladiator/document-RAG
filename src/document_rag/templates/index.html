@@ -143,6 +143,91 @@
       .source:hover {
         transform: translateY(-2px);
       }
+
+      .history-header-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .history-item {
+        border-bottom: 1px solid #e5e5e5;
+        padding: 16px 0;
+      }
+
+      .history-item:last-child {
+        border-bottom: none;
+      }
+
+      .history-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .history-query {
+        font-weight: bold;
+        font-size: 15px;
+        color: #1f2937;
+      }
+
+      .history-meta {
+        font-size: 12px;
+        color: #6b7280;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .history-badge {
+        display: inline-block;
+        background: #e0e7ff;
+        color: #3730a3;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+
+      .history-answer {
+        margin-top: 8px;
+        padding: 12px 14px;
+        background: #f9fafb;
+        border-radius: 6px;
+        border-left: 3px solid #2563eb;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        font-size: 14px;
+      }
+
+      .history-sources {
+        margin-top: 8px;
+        font-size: 13px;
+      }
+
+      .history-sources summary {
+        cursor: pointer;
+        color: #4b5563;
+        font-weight: 600;
+        user-select: none;
+      }
+
+      .history-sources-list {
+        margin-top: 6px;
+        padding-left: 10px;
+      }
+
+      .history-source-item {
+        background: #f3f4f6;
+        padding: 8px 10px;
+        border-radius: 4px;
+        margin-bottom: 6px;
+        font-size: 12px;
+        line-height: 1.4;
+      }
     </style>
   </head>
 
@@ -197,6 +282,15 @@
       <h2>Sources</h2>
 
       <div id="sources">No sources yet.</div>
+    </div>
+
+    <div class="section">
+      <div class="history-header-bar">
+        <h2>Chat History (Memory)</h2>
+        <button onclick="clearChatHistory()" id="clearHistoryBtn">Clear History</button>
+      </div>
+
+      <div id="chatHistory">Loading memory...</div>
     </div>
 
     <script>
@@ -483,6 +577,8 @@
 
             sources.appendChild(div);
           }
+
+          loadHistory();
         } catch (error) {
           console.error("Ask error:", error);
 
@@ -493,8 +589,109 @@
         }
       }
 
+      function escapeHtml(text) {
+        if (!text) return "";
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      async function loadHistory() {
+        const container = document.getElementById("chatHistory");
+
+        try {
+          const response = await fetch("/history");
+          const data = await response.json();
+
+          container.innerHTML = "";
+
+          if (!data.history || data.history.length === 0) {
+            container.innerHTML =
+              '<div class="empty">No search memory recorded yet.</div>';
+            return;
+          }
+
+          const reversed = [...data.history].reverse();
+
+          for (const item of reversed) {
+            const div = document.createElement("div");
+            div.className = "history-item";
+
+            const fileName = item.file_path
+              ? item.file_path.split("/").pop()
+              : "All documents";
+
+            let sourcesHtml = "";
+            if (item.sources && item.sources.length > 0) {
+              const sourceCards = item.sources
+                .map(
+                  (s) => `
+                    <div class="history-source-item">
+                      <strong>Source ${s.source_number}:</strong> ${
+                        escapeHtml(s.metadata?.file_name || s.metadata?.file_path || "Document")
+                      } (Chunk ${s.metadata?.chunk_index ?? "N/A"})
+                      <br>
+                      <em>${escapeHtml((s.text || "").substring(0, 150))}${(s.text || "").length > 150 ? "..." : ""}</em>
+                    </div>
+                  `
+                )
+                .join("");
+
+              sourcesHtml = `
+                <details class="history-sources">
+                  <summary>${item.sources.length} source(s) referenced</summary>
+                  <div class="history-sources-list">
+                    ${sourceCards}
+                  </div>
+                </details>
+              `;
+            }
+
+            div.innerHTML = `
+              <div class="history-top">
+                <span class="history-query">Q: ${escapeHtml(item.query)}</span>
+                <span class="history-meta">
+                  <span class="history-badge">${escapeHtml(fileName)}</span>
+                  <span>${escapeHtml(item.timestamp || "")}</span>
+                </span>
+              </div>
+              <div class="history-answer">${escapeHtml(item.answer || "")}</div>
+              ${sourcesHtml}
+            `;
+
+            container.appendChild(div);
+          }
+        } catch (error) {
+          console.error("Failed to load chat history:", error);
+          container.textContent = "Could not load chat history.";
+        }
+      }
+
+      async function clearChatHistory() {
+        if (!confirm("Are you sure you want to clear the chat memory?")) {
+          return;
+        }
+
+        try {
+          const response = await fetch("/history", {
+            method: "DELETE",
+          });
+
+          if (!response.ok) {
+            alert("Failed to clear memory.");
+            return;
+          }
+
+          loadHistory();
+        } catch (error) {
+          console.error("Clear memory error:", error);
+          alert("Failed to clear memory.");
+        }
+      }
+
       loadDocuments();
       loadDocumentSelector();
+      loadHistory();
     </script>
   </body>
 </html>
