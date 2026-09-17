@@ -1,5 +1,4 @@
 import os
-
 import chromadb
 from groq import Groq
 from sentence_transformers import SentenceTransformer
@@ -102,7 +101,7 @@ Content:
     return "\n".join(context_parts)
 
 
-def generate_answer(query, context):
+def generate_answer_stream(query, context):
 
     prompt = f"""
 You are a helpful document question-answering assistant.
@@ -138,10 +137,53 @@ Answer:
                 "content": prompt
             }
         ],
-        temperature=0
+        temperature=0,
+        stream=True
     )
 
-    return response.choices[0].message.content
+    for chunk in response:
+        if chunk.choices and len(chunk.choices) > 0:
+            delta = chunk.choices[0].delta
+            content = getattr(delta, "content", None)
+            if content:
+                yield content
+
+
+def generate_answer(query, context):
+
+    return "".join(generate_answer_stream(query, context))
+
+
+def ask_rag_stream(
+    query,
+    top_k=5,
+    file_path=None
+):
+
+    results = retrieve(
+        query=query,
+        top_k=top_k,
+        file_path=file_path
+    )
+
+    sources = [
+        {
+            "source_number": i,
+            "metadata": result["metadata"],
+            "distance": result["distance"],
+            "text": result["text"]
+        }
+        for i, result in enumerate(results, start=1)
+    ]
+
+    if not results:
+        def empty_stream():
+            yield "I couldn't find the answer in the provided documents."
+
+        return sources, empty_stream()
+
+    context = build_context(results)
+    return sources, generate_answer_stream(query=query, context=context)
 
 
 def ask_rag(

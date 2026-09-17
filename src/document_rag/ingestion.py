@@ -1,6 +1,5 @@
 from pathlib import Path
 import re
-
 from pypdf import PdfReader
 from docx import Document
 

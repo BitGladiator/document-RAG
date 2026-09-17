@@ -228,6 +228,42 @@
         font-size: 12px;
         line-height: 1.4;
       }
+
+      .streaming-cursor {
+        display: inline-block;
+        font-weight: bold;
+        color: #2563eb;
+        margin-left: 2px;
+        animation: blink 0.9s infinite;
+      }
+
+      @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+      }
+
+      .current-question {
+        font-weight: bold;
+        color: #1f2937;
+        margin-bottom: 8px;
+        font-size: 15px;
+      }
+
+      .answer-body {
+        white-space: pre-wrap;
+        line-height: 1.6;
+      }
+
+      #stopBtn {
+        background: #fee2e2;
+        color: #b91c1c;
+        border-color: #fca5a5;
+        margin-left: 6px;
+      }
+
+      #stopBtn:hover {
+        background: #fecaca;
+      }
     </style>
   </head>
 
@@ -269,7 +305,8 @@
         placeholder="Ask something about your documents..."
       />
 
-      <button onclick="askQuestion()">Ask</button>
+      <button id="askBtn" onclick="askQuestion()">Ask</button>
+      <button id="stopBtn" onclick="stopGeneration()" style="display: none;">Stop generating</button>
     </div>
 
     <div class="section">
@@ -443,8 +480,70 @@
           console.error("Could not load document selector:", error);
         }
       }
-      function renderAnswerWithCitations(text) {
-        const answer = document.getElementById("answer");
+      function escapeHtml(text) {
+        if (!text) return "";
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      function renderSources(sourcesList) {
+        const sources = document.getElementById("sources");
+        sources.innerHTML = "";
+
+        if (!sourcesList || sourcesList.length === 0) {
+          sources.innerHTML =
+            '<div class="empty">No relevant sources found.</div>';
+          return;
+        }
+
+        for (const source of sourcesList) {
+          const div = document.createElement("div");
+
+          div.className = "source";
+          div.id = `source-${source.source_number}`;
+          const metadata = source.metadata || {};
+
+          const fileName =
+            metadata.file_name || metadata.file_path || "Unknown file";
+
+          const chunk = metadata.chunk_index ?? "Unknown";
+
+          const page = metadata.page_number;
+
+          const distance = source.distance;
+          const text = source.text || "No source text available.";
+          div.innerHTML = `
+            <div class="source-header">
+              <strong>
+                Source ${source.source_number}
+              </strong>
+
+              <span class="distance">
+                Distance:
+                ${distance !== undefined ? distance.toFixed(4) : "N/A"}
+              </span>
+            </div>
+
+            <div class="source-file">
+              ${escapeHtml(fileName)}
+            </div>
+
+            <div class="source-meta">
+              Chunk: ${chunk}
+              ${page ? ` · Page: ${page}` : ""}
+            </div>
+            <div class="source-text">
+              ${escapeHtml(text)}
+            </div>
+          `;
+
+          sources.appendChild(div);
+        }
+      }
+
+      function renderAnswerWithCitations(text, targetElement = null) {
+        const answer = targetElement || document.getElementById("answer");
 
         answer.innerHTML = "";
 
@@ -483,6 +582,30 @@
           }
         }
       }
+
+      let currentAbortController = null;
+
+      function setGeneratingState(isGenerating) {
+        const askBtn = document.getElementById("askBtn");
+        const stopBtn = document.getElementById("stopBtn");
+
+        if (isGenerating) {
+          if (askBtn) askBtn.disabled = true;
+          if (stopBtn) stopBtn.style.display = "inline-block";
+        } else {
+          if (askBtn) askBtn.disabled = false;
+          if (stopBtn) stopBtn.style.display = "none";
+          currentAbortController = null;
+        }
+      }
+
+      function stopGeneration() {
+        if (currentAbortController) {
+          currentAbortController.abort();
+          currentAbortController = null;
+        }
+      }
+
       async function askQuestion() {
         const questionInput = document.getElementById("question");
         const documentSelect = document.getElementById("documentSelect");
@@ -498,103 +621,146 @@
           return;
         }
 
-        answer.textContent = "Thinking...";
-        sources.innerHTML = "Searching documents...";
+        setGeneratingState(true);
+
+        answer.innerHTML = `
+          <div class="current-question">Q: ${escapeHtml(question)}</div>
+          <div class="answer-body"><span id="streamingText"></span><span id="streamingCursor" class="streaming-cursor">▌</span></div>
+        `;
+        sources.innerHTML = '<span class="empty">Searching documents...</span>';
+
+        const streamingText = document.getElementById("streamingText");
+        const streamingCursor = document.getElementById("streamingCursor");
+        const answerBody = answer.querySelector(".answer-body");
+
+        currentAbortController = new AbortController();
+        let accumulatedAnswer = "";
+        let streamCompletedSuccessfully = false;
 
         try {
           const response = await fetch("/ask", {
             method: "POST",
-
             headers: {
               "Content-Type": "application/json",
             },
-
             body: JSON.stringify({
               query: question,
               file_path: selectedFile || null,
             }),
+            signal: currentAbortController.signal,
           });
 
-          const data = await response.json();
-
           if (!response.ok) {
-            answer.textContent = data.error || "Something went wrong.";
-            sources.innerHTML = "No sources.";
+            let errorMsg = "Something went wrong.";
+            try {
+              const errData = await response.json();
+              if (errData && errData.error) errorMsg = errData.error;
+            } catch (_) {}
+            answer.textContent = errorMsg;
+            sources.innerHTML = '<div class="empty">No sources.</div>';
+            setGeneratingState(false);
             return;
           }
 
-          renderAnswerWithCitations(data.answer);
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder("utf-8");
+          let buffer = "";
 
-          sources.innerHTML = "";
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
 
-          if (!data.sources || data.sources.length === 0) {
-            sources.innerHTML =
-              '<div class="empty">No relevant sources found.</div>';
+            buffer += decoder.decode(value, { stream: true });
 
-            return;
+            let boundaryIndex;
+            while ((boundaryIndex = buffer.indexOf("\n\n")) !== -1) {
+              const rawMessage = buffer.slice(0, boundaryIndex);
+              buffer = buffer.slice(boundaryIndex + 2);
+
+              const lines = rawMessage.split("\n");
+              let eventType = "message";
+              let dataStr = "";
+
+              for (const line of lines) {
+                if (line.startsWith("event:")) {
+                  eventType = line.slice(6).trim();
+                } else if (line.startsWith("data:")) {
+                  dataStr = line.slice(5).trim();
+                }
+              }
+
+              if (!dataStr) continue;
+
+              let payload;
+              try {
+                payload = JSON.parse(dataStr);
+              } catch (parseErr) {
+                console.error("Malformed SSE data JSON:", parseErr, dataStr);
+                continue;
+              }
+
+              if (eventType === "sources") {
+                renderSources(payload.sources || []);
+              } else if (eventType === "token") {
+                if (payload.token) {
+                  accumulatedAnswer += payload.token;
+                  streamingText.textContent = accumulatedAnswer;
+                }
+              } else if (eventType === "done") {
+                streamCompletedSuccessfully = true;
+                const finalAnswer = payload.answer || accumulatedAnswer;
+                if (streamingCursor) streamingCursor.remove();
+                renderAnswerWithCitations(finalAnswer, answerBody);
+                loadHistory();
+              } else if (eventType === "error") {
+                if (streamingCursor) streamingCursor.remove();
+                const errDiv = document.createElement("div");
+                errDiv.style.color = "#dc2626";
+                errDiv.style.marginTop = "8px";
+                errDiv.textContent = `Error: ${payload.error || "Unknown error"}`;
+                answerBody.appendChild(errDiv);
+              }
+            }
           }
 
-          for (const source of data.sources) {
-            const div = document.createElement("div");
-
-            div.className = "source";
-            div.id = `source-${source.source_number}`;
-            const metadata = source.metadata || {};
-
-            const fileName =
-              metadata.file_name || metadata.file_path || "Unknown file";
-
-            const chunk = metadata.chunk_index ?? "Unknown";
-
-            const page = metadata.page_number;
-
-            const distance = source.distance;
-            const text = source.text || "No source text available.";
-            div.innerHTML = `
-              <div class="source-header">
-                <strong>
-                  Source ${source.source_number}
-                </strong>
-
-                <span class="distance">
-                  Distance:
-                  ${distance !== undefined ? distance.toFixed(4) : "N/A"}
-                </span>
-              </div>
-
-              <div class="source-file">
-                ${fileName}
-              </div>
-
-              <div class="source-meta">
-                Chunk: ${chunk}
-                ${page ? ` · Page: ${page}` : ""}
-              </div>
-              <div class="source-text">
-                ${text}
-              </div>
-            `;
-
-            sources.appendChild(div);
+          if (!streamCompletedSuccessfully && accumulatedAnswer) {
+            if (streamingCursor) streamingCursor.remove();
+            renderAnswerWithCitations(accumulatedAnswer, answerBody);
           }
-
-          loadHistory();
         } catch (error) {
-          console.error("Ask error:", error);
+          if (streamingCursor) streamingCursor.remove();
 
-          answer.textContent = "Request failed. Please try again.";
-
-          sources.innerHTML =
-            '<div class="empty">Could not load sources.</div>';
+          if (error.name === "AbortError") {
+            const stoppedNotice = document.createElement("div");
+            stoppedNotice.style.color = "#6b7280";
+            stoppedNotice.style.fontStyle = "italic";
+            stoppedNotice.style.marginTop = "8px";
+            stoppedNotice.textContent = "[Generation stopped]";
+            if (answerBody) answerBody.appendChild(stoppedNotice);
+          } else {
+            console.error("Ask error:", error);
+            if (answerBody) {
+              const errNotice = document.createElement("div");
+              errNotice.style.color = "#dc2626";
+              errNotice.style.marginTop = "8px";
+              errNotice.textContent = "Request failed. Please try again.";
+              answerBody.appendChild(errNotice);
+            } else {
+              answer.textContent = "Request failed. Please try again.";
+            }
+            sources.innerHTML =
+              '<div class="empty">Could not load sources.</div>';
+          }
+        } finally {
+          setGeneratingState(false);
         }
       }
 
-      function escapeHtml(text) {
-        if (!text) return "";
-        const div = document.createElement("div");
-        div.textContent = text;
-        return div.innerHTML;
-      }
+      document.getElementById("question").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          askQuestion();
+        }
+      });
 
       async function loadHistory() {
         const container = document.getElementById("chatHistory");

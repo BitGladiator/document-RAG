@@ -1,8 +1,7 @@
+import json
 from pathlib import Path
-
-from flask import Flask, jsonify, request, render_template
-
-from .rag import ask_rag
+from flask import Flask, jsonify, request, render_template, Response, stream_with_context
+from .rag import ask_rag, ask_rag_stream
 from .memory import (
     add_interaction,
     get_history,
@@ -43,25 +42,61 @@ def ask():
 
     data = request.get_json()
 
-    if not data or "query" not in data:
+    if not data or "query" not in data or not str(data["query"]).strip():
 
         return jsonify({
             "error": "Missing 'query'"
         }), 400
 
-    result = ask_rag(
-      query=data["query"],
-      file_path=data.get("file_path")
-    )
+    query = str(data["query"]).strip()
+    file_path = data.get("file_path") or None
 
-    add_interaction(
-        query=data["query"],
-        answer=result.get("answer", ""),
-        sources=result.get("sources", []),
-        file_path=data.get("file_path")
-    )
+    def sse_event(event_type, payload):
+        return f"event: {event_type}\ndata: {json.dumps(payload)}\n\n"
 
-    return jsonify(result)
+    def generate():
+        accumulated_answer = []
+        try:
+            sources, stream = ask_rag_stream(
+                query=query,
+                file_path=file_path
+            )
+
+            # Send retrieved sources immediately before LLM generation starts
+            yield sse_event("sources", {"sources": sources})
+
+            # Stream LLM tokens incrementally
+            for token in stream:
+                accumulated_answer.append(token)
+                yield sse_event("token", {"token": token})
+
+            full_answer = "".join(accumulated_answer)
+
+            # Persist to history only upon successful completion
+            add_interaction(
+                query=query,
+                answer=full_answer,
+                sources=sources,
+                file_path=file_path
+            )
+
+            yield sse_event("done", {
+                "answer": full_answer,
+                "sources": sources
+            })
+
+        except Exception as e:
+            yield sse_event("error", {"error": str(e)})
+
+    return Response(
+        stream_with_context(generate()),
+        mimetype="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive"
+        }
+    )
 
 
 @app.get("/history")

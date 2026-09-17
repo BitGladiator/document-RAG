@@ -1,8 +1,6 @@
 from pathlib import Path
-
 import chromadb
 from sentence_transformers import SentenceTransformer
-
 from .ingestion import load_document
 from .chunking import chunk_text
 
