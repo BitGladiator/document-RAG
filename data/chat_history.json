@@ -1,19 +1,19 @@
 [
   {
-    "id": "d4cafca7-62ba-4938-849a-f72b718b369c",
-    "timestamp": "2026-09-17 18:18:17",
+    "id": "1f5f8dda-49be-4fd1-b4f2-c423bfde7a4d",
+    "timestamp": "2026-09-18 13:40:35",
     "query": "What is ExploitGym?",
-    "answer": "ExploitGym is a large\u2011scale, comprehensive benchmark created to measure how well AI agents can turn software vulnerabilities into real exploits.  It packages 898 instances drawn from real\u2011world bugs in three domains\u2014userspace programs, Google\u2019s V8 JavaScript engine, and the Linux kernel\u2014each supplied with build information, a proof\u2011of\u2011vulnerability input, source code, and a configurable set of security mitigations.  The benchmark runs the tasks in reproducible containerized environments and validates success by requiring the agent to capture a privileged \u201cflag\u201d and pass an agent\u2011as\u2011judge check that the exploit actually leveraged the intended vulnerability\u3010Source\u202f2\u2020L1-L9\u3011\u3010Source\u202f4\u2020L1-L9\u3011.  In short, ExploitGym is the first comprehensive AI\u2011agent exploitation benchmark, providing a realistic, diverse testbed for assessing exploitation capabilities\u3010Source\u202f1\u2020L1-L3\u3011.",
+    "answer": "ExploitGym is a large\u2011scale, realistic benchmark created to measure the exploitation abilities of AI agents. It consists of 898 instances drawn from real\u2011world vulnerabilities in three software domains\u2014userspace programs, Google\u2019s V8 JavaScript engine, and the Linux kernel. Each instance supplies the agent with build information, a proof\u2011of\u2011vulnerability (PoV) input, a textual description of the bug, and a containerized runtime where security mitigations (e.g., ASLR, stack canaries, sandboxing) can be turned on or off. The agent\u2019s task is to transform the PoV into a working exploit that captures a privileged flag, and an \u201cagent\u2011as\u2011judge\u201d verifies that the exploit actually leverages the provided vulnerability. ExploitGym is described as the first comprehensive benchmark for exploitation of AI agents\u202f[Source\u202f1][Source\u202f2][Source\u202f4].",
     "file_path": null,
     "sources": [
       {
         "source_number": 1,
         "metadata": {
           "chunk_index": 4,
-          "file_type": ".pdf",
-          "page_number": 3,
           "file_name": "2605.11086v1.pdf",
-          "file_path": "/workspace/data/documents/2605.11086v1.pdf"
+          "file_type": ".pdf",
+          "file_path": "/workspace/data/documents/2605.11086v1.pdf",
+          "page_number": 3
         },
         "distance": 0.9696133136749268,
         "text": "environments. This makes ExploitGym the first com- prehensive benchmark for exploitation. The remaining benchmarks [10, 29, 35, 50, 58, 62] focus on complementary cybersecurity capabilities rather than exploitation itself, including vulnerability reproduction, patch generation, and secure code generation. Our work also aligns with recent efforts on evaluating potentially dangerous capabilities of frontier models [1, 30, 44]. In this context, higher scores on ExploitGym reflect stronger exploitation abilities or risks, but not necessarily better or safer models overall. 3 ExploitGym Benchmark This section presents the ExploitGym benchmark. We describe the evaluation protocol (Section 3.1), the task domains along with their security models and configurable mitigations (Section 3.2), and the data sources and construction process (Section 3.3). 3.1 Evaluation Protocol Agent Input.As illustrated in Figure 1, every benchmark instance ships with three categories of information: (i)build information, including source code, build configurations, and build scripts 3"
@@ -21,11 +21,11 @@
       {
         "source_number": 2,
         "metadata": {
-          "chunk_index": 0,
-          "file_name": "2605.11086v1.pdf",
           "file_path": "/workspace/data/documents/2605.11086v1.pdf",
           "page_number": 1,
-          "file_type": ".pdf"
+          "file_type": ".pdf",
+          "chunk_index": 0,
+          "file_name": "2605.11086v1.pdf"
         },
         "distance": 1.0065957307815552,
         "text": "ExploitGym: Can AI Agents Turn Security Vulnerabilities into Real Attacks? Zhun Wang1,\u2709 Nico Schiller2,\u2709 Hongwei Li3,\u2709 Srijiith Sesha Narayana2,\u2709 Milad Nasr5 Nicholas Carlini5 Xiangyu Qi6 Eric Wallace6 Elie Bursztein7 Luca Invernizzi7 Kurt Thomas 7 Yan Shoshitaishvili4 Wenbo Guo3 Jingxuan He1 Thorsten Holz2 Dawn Song1 1UC Berkeley 2Max Planck Institute for Security and Privacy 3UC Santa Barbara 4Arizona State University 5Anthropic 6OpenAI 7Google Abstract AI agents are rapidly gaining capabilities that could significantly reshape cybersecu- rity, making rigorous evaluation urgent. A critical capability isexploitation: turning a vulnerability, which is not yet an attack, into a concrete security impact, such as unauthorized file access or code execution. Exploitation is a particularly chal- lenging task because it requires low-level program reasoning (e.g., about memory layout), runtime adaptation, and sustained progress over long horizons. Meanwhile, it is inherently dual-use, supporting defensive workflows while lowering the barrier for offense. Despite its importance and diagnostic value, exploitation remains under-evaluated. To address this gap, we introduce ExploitGym, a large-scale, diverse, realistic benchmark on the exploitation capabilities of AI agents. Given a program input that triggers a vulnerability, ExploitGym tasks agents with pro- gressively extending it into a working exploit. The benchmark comprises 898 instances sourced from real-world vulnerabilities across three domains, including userspace programs, Google\u2019s V8 JavaScript engine, and the Linux kernel. We vary the security protections applied to each instance, isolating their impact on agent performance. All configurations are packaged in reproducible containerized environments. Our evaluation shows that while exploitation remains challenging, frontier models can successfully exploit a non-trivial fraction of vulnerabilities. For example, the strongest configurations are Anthropic\u2019s latest model Claude Mythos Preview and OpenAI\u2019s GPT-5.5, which produce working exploits for 157 and 120 instances, respectively. Notably, even with widely used defenses enabled, models retain non-trivial success rates. These results establish ExploitGym as an effective testbed for exploitation and highlight the growing cybersecurity risks posed by increasingly capable AI agents. /exclamati\u2322n-triangleMain experiments are conducted under trusted-access programs with safeguards disabled to measure the capability boundary of frontier models and agents. 1 Introduction Recent progress in large language models (LLMs) and AI agents has led to rapid improvements in cybersecurity capabilities, making rigorous evaluation increasingly urgent. Prior work has introduced benchmarks for a range of cybersecurity-related tasks, such as vulnerability reproduction [62], patch generation [63], and Capture-the-Flag problem solving [49, 65]. Frontier models now achieve strong *The benchmark design and experimental methodology are developed by the academic authors. Industry partners provided feedback on the benchmark design, facilitated access to their models, and assisted with running select experiments. Preprint. arXiv:2605.11086v1 [cs.CR] 11 May 2026"
@@ -34,10 +34,10 @@
         "source_number": 3,
         "metadata": {
           "file_type": ".pdf",
-          "file_path": "/workspace/data/documents/2605.11086v1.pdf",
-          "chunk_index": 5,
+          "file_name": "2605.11086v1.pdf",
           "page_number": 4,
-          "file_name": "2605.11086v1.pdf"
+          "chunk_index": 5,
+          "file_path": "/workspace/data/documents/2605.11086v1.pdf"
         },
         "distance": 1.040361762046814,
         "text": "Agent 898 vulnerabilities in Userspace, Browser (V8), Linux Kernel Local Environment Building & Source codebase, configs, deps Vulnerability PoV, vuln. description binary, args, mitigations Runtime & Target Authorized Scope Secret Flag unauth code exec Flag Verification verifies unauth. code execution Agent-as-a-Judge whether exploits the target vuln? Vulnerable Entrypoint Remote Target Exploits Mitigations (e.g., K/ASLR, Stack Canary, V8 Sandbox) Figure 1: Overview of ExploitGym. A vulnerability paired with a mitigation setting defines a task instance, which provides the agent with build, vulnerability, and runtime information. The agent interacts with a restricted remote target to develop exploits. Success is verified in two stages: flag verification confirms unauthorized code execution, and an agent-as-a-judge assesses whether the exploit targets the provided vulnerability. sufficient to reproduce the vulnerable binary; (ii)vulnerability information, including a PoV input that triggers the bug, a description of the vulnerability, and a patch revealing its root cause; and (iii)runtime information, including the compiled binaries (executables and kernel images) together with a launch script specifying the runtime configuration. Individual mitigations can be toggled on or off, allowing us to evaluate agent performance both with and without specific defenses enabled. The vulnerability information is configurable: each component can be included or withheld independently, allowing us to measure how agent performance changes as less guidance is provided. By default, the patch is withheld to simulate realistic exploitation conditions. The agent interacts with a remote target whose vulnerable entrypoint is exposed within a controlled authorized scope (e.g., executed by an unprivileged user). The form of the entrypoint and the boundaries of the authorized scope depend on the task domain (detailed in Section 3.2). The remote target supports multiple rounds of interaction, and the agent can send requests to a controller server to reset the target to a clean state. All components are packaged in containerized environments to ensure consistent and reproducible evaluation. Flag Captured.Each target environment contains a dynamically generated flag that is stored outside the agent\u2019s authorized scope and is inaccessible through any legitimate interface; retrieving it requires executing code with privileges that should not be obtainable under the specific security model. The agentcaptures the flagby submitting the correct value, demonstrating that it has achieved unauthorized code execution. Flag capture is a necessary but not sufficient condition for success. Success.We define an exploit attempt assuccessfulonly if it both captures the flag and passes an agent-as-a-judgeevaluation. The judge examines the agent\u2019s trajectory to assess whether it genuinely leveraged the intended vulnerability rather than succeeding through an unrelated shortcut, such as exploiting a different, more easily exploitable vulnerability or reproducing a known public exploit. This judgment requires multi-step interaction and complex information retrieval and reasoning, motivating the use of an agentic evaluator rather than a single-query check. We provide the judge agent with the full trajectory, the corresponding benchmark input, and all agent-produced artifacts. 3.2 Task Domains We evaluate exploitation across three task domains that span critical layers of the software stack: userspace programs, the V8 JavaScript engine used in Chromium-based browsers, and the Linux kernel."
@@ -45,10 +45,10 @@
       {
         "source_number": 4,
         "metadata": {
-          "file_path": "/workspace/data/documents/2605.11086v1.pdf",
-          "file_type": ".pdf",
           "page_number": 2,
           "file_name": "2605.11086v1.pdf",
+          "file_path": "/workspace/data/documents/2605.11086v1.pdf",
+          "file_type": ".pdf",
           "chunk_index": 1
         },
         "distance": 1.0404831171035767,
@@ -57,14 +57,81 @@
       {
         "source_number": 5,
         "metadata": {
-          "file_type": ".pdf",
-          "file_path": "/workspace/data/documents/2605.11086v1.pdf",
-          "file_name": "2605.11086v1.pdf",
           "page_number": 3,
-          "chunk_index": 3
+          "chunk_index": 3,
+          "file_type": ".pdf",
+          "file_name": "2605.11086v1.pdf",
+          "file_path": "/workspace/data/documents/2605.11086v1.pdf"
         },
         "distance": 1.155877947807312,
         "text": "2 Related Work Vulnerability Discovery and Exploitation.Vulnerability discovery is a fundamental cybersecurity task, and fuzzing has become one of the most effective approaches for identifying security flaws in complex software systems [33, 66]. Existing fuzzers range from general-purpose ones, such as AFL++ [14] and libFuzzer [32], to domain-specific ones for JavaScript engines [8, 23, 41] and OS kernels [47, 59, 60]. Large-scale infrastructure projects such as OSS-Fuzz [ 19], ClusterFuzz [18], syzbot [17], and kernelCTF [21] continuously discover, reproduce, and archive vulnerabilities with artifacts such as crashing inputs and vulnerable revisions. Public issue trackers [54] further provide manually reported vulnerabilities and exploit-relevant discussions. These systems provide essential infrastructure for discovering, reproducing, and triaging vulnerabilities, and their artifacts offer a natural starting point for AI-agent evaluations. However, they were not designed as benchmarks. In contrast, ExploitGym transforms vulnerability artifacts into controlled evaluation tasks with standardized prompts, execution environments, configurable defenses, and reliable exploit validation. Exploitation has remained highly challenging despite decades of security research [ 51, 53]. A broad range of techniques exists, including stack-smashing attacks [36], return-oriented program- ming [45, 48], and data-oriented programming [27], often designed to bypass increasingly sophis- ticated mitigations. Prior work has also explored automated exploit generation [ 5, 7, 25, 26, 61]. However, these approaches often rely on strong assumptions about vulnerability classes (e.g., stack or heap overflows), exploit structures such as fixed primitives, or execution environments (e.g., certain defenses disabled or predetermined heap layouts). In contrast, ExploitGym provides a unified and reproducible benchmark spanning multiple software domains and mitigation settings, enabling systematic evaluation of modern AI-driven exploitation generation. Table 1: Comparing ExploitGym with ex- isting cybersecurity benchmarks for AI agents. Domains: C = capture-the-flag, U = userspace, B = browser, K = kernel. Benchmark Exploit Domain Size NYU CTF [49]\u2713C 200 Cybench [65]\u2713C 40 CVE-Bench [67]\u2713U 40 BountyBench [64]\u2713U 40 BaxBench [58]\u2717U 392 PatchAgent [63]\u2717U 178 SEC-bench [29]\u2717U 200 SeCodePLT [35]\u2717U 1658 CyberGym [62]\u2717U 1507 SecRepoBench [50]\u2717U 318 SecureAgentBench [10]\u2717U 105 ExploitGym (Ours)\u2713U+B+K 898 Cybersecurity Benchmarks for AI Agents.Recently, we have seen growing interest in constructing cybersecu- rity benchmarks for evaluating AI agents, because of the high stakes of this area. We summarize these efforts in Table 1 and compare them with ExploitGym. Among ex- isting benchmarks, NYU CTF [49], Cybench [65], CVE- Bench [67], and BountyBench [64] include exploitation tasks. However, these benchmarks are relatively small in scale (at most 200 instances) and primarily focus on either capture-the-flag environments (i.e., synthetic vul- nerabilities on relatively small codebases) or userspace software. In contrast, ExploitGym provides a substan- tially larger benchmark (898 instances) constructed from real-world vulnerabilities spanning userspace programs, browser (V8), and the Linux kernel, together with con- figurable security defenses and reproducible execution environments. This makes ExploitGym the first com- prehensive benchmark for exploitation. The remaining benchmarks [10, 29, 35, 50, 58, 62] focus on complementary cybersecurity capabilities rather than exploitation itself, including vulnerability reproduction, patch generation, and secure code generation. Our work also aligns with recent efforts on evaluating potentially dangerous capabilities"
+      }
+    ]
+  },
+  {
+    "id": "3e0dfa92-3aca-4fd4-b637-1028da199db5",
+    "timestamp": "2026-09-18 13:45:08",
+    "query": "compare documents",
+    "answer": "**Document\u202f1 (test.txt)**  \n- A short explanatory note that defines Retrieval\u2011Augmented Generation (RAG) and describes its two\u2011step process: first retrieve relevant information from a knowledge base, then feed that information to a large language model as context. It highlights that RAG can reduce hallucinations and enable use of private or external data\u202f[Source\u202f1].\n\n**Documents\u202f2\u20115 (excerpts from\u202f1706.03762v7.pdf)**  \n- All belong to the same research paper that introduces the **Transformer** model.  \n- They discuss technical details such as variations of the Transformer architecture, training hyper\u2011parameters, and performance metrics on translation and parsing tasks\u202f[Source\u202f2].  \n- They present empirical results showing the Transformer\u2019s strong performance on English constituency parsing, comparing it with prior discriminative and generative parsers\u202f[Source\u202f5].  \n- The other chunks provide citations and references related to the paper\u2019s background and related work\u202f[Source\u202f3][Source\u202f4].\n\n**Key comparisons**\n\n| Aspect | Document\u202f1 (RAG note) | Documents\u202f2\u20115 (Transformer paper) |\n|--------|----------------------|-----------------------------------|\n| **Primary focus** | Describing the RAG paradigm (retrieval\u202f+\u202fLLM). | Describing, evaluating, and extending the Transformer architecture (attention\u2011only sequence model). |\n| **Length & format** | One\u2011paragraph explanatory text. | Multiple sections of a scholarly article (tables, experimental results, references). |\n| **Goal** | Explain how combining retrieval with LLMs can reduce hallucinations and use private data. | Present a novel model, analyze architectural variations, and benchmark it against state\u2011of\u2011the\u2011art translation and parsing systems. |\n| **Technical content** | Conceptual description, no quantitative metrics. | Detailed hyper\u2011parameter tables, perplexity and BLEU scores, F1 scores for parsing, and discussion of dropout, heads, etc.\u202f[Source\u202f2][Source\u202f5] |\n| **Domain** | General AI/LLM usage scenario. | Machine translation and syntactic parsing research. |\n\nIn summary, the first document is a concise overview of the Retrieval\u2011Augmented Generation approach, while the other documents constitute parts of a research paper that introduces and evaluates the Transformer model, providing extensive experimental data and scholarly references.",
+    "file_path": null,
+    "sources": [
+      {
+        "source_number": 1,
+        "metadata": {
+          "chunk_index": 0,
+          "file_path": "/workspace/data/documents/test.txt",
+          "file_type": ".txt"
+        },
+        "distance": 1.4953298568725586,
+        "text": "Retrieval-Augmented Generation (RAG) combines\ninformation retrieval with large language models.\n\nA RAG system first retrieves relevant information\nfrom a knowledge base and then provides that\ninformation to an LLM as context.\n\nThis can reduce hallucinations and allow an LLM\nto answer questions using private or external data."
+      },
+      {
+        "source_number": 2,
+        "metadata": {
+          "chunk_index": 13,
+          "file_path": "/workspace/data/documents/1706.03762v7.pdf",
+          "page_number": 9,
+          "file_name": "1706.03762v7.pdf",
+          "file_type": ".pdf"
+        },
+        "distance": 1.5706360340118408,
+        "text": "Table 3: Variations on the Transformer architecture. Unlisted values are identical to those of the base model. All metrics are on the English-to-German translation development set, newstest2013. Listed perplexities are per-wordpiece, according to our byte-pair encoding, and should not be compared to per-word perplexities. N d model dff h d k dv Pdrop \u03f5ls train PPL BLEU params steps (dev) (dev) \u00d7106 base 6 512 2048 8 64 64 0.1 0.1 100K 4.92 25.8 65 (A) 1 512 512 5.29 24.9 4 128 128 5.00 25.5 16 32 32 4.91 25.8 32 16 16 5.01 25.4 (B) 16 5.16 25.1 58 32 5.01 25.4 60 (C) 2 6.11 23.7 36 4 5.19 25.3 50 8 4.88 25.5 80 256 32 32 5.75 24.5 28 1024 128 128 4.66 26.0 168 1024 5.12 25.4 53 4096 4.75 26.2 90 (D) 0.0 5.77 24.6 0.2 4.95 25.5 0.0 4.67 25.3 0.2 5.47 25.7 (E) positional embedding instead of sinusoids 4.92 25.7 big 6 1024 4096 16 0.3 300K 4.33 26.4 213 development set, newstest2013. We used beam search as described in the previous section, but no checkpoint averaging. We present these results in Table 3. In Table 3 rows (A), we vary the number of attention heads and the attention key and value dimensions, keeping the amount of computation constant, as described in Section 3.2.2. While single-head attention is 0.9 BLEU worse than the best setting, quality also drops off with too many heads. In Table 3 rows (B), we observe that reducing the attention key size dk hurts model quality. This suggests that determining compatibility is not easy and that a more sophisticated compatibility function than dot product may be beneficial. We further observe in rows (C) and (D) that, as expected, bigger models are better, and dropout is very helpful in avoiding over-fitting. In row (E) we replace our sinusoidal positional encoding with learned positional embeddings [9], and observe nearly identical results to the base model. 6.3 English Constituency Parsing To evaluate if the Transformer can generalize to other tasks we performed experiments on English constituency parsing. This task presents specific challenges: the output is subject to strong structural constraints and is significantly longer than the input. Furthermore, RNN sequence-to-sequence models have not been able to attain state-of-the-art results in small-data regimes [37]. We trained a 4-layer transformer withdmodel = 1024 on the Wall Street Journal (WSJ) portion of the Penn Treebank [25], about 40K training sentences. We also trained it in a semi-supervised setting, using the larger high-confidence and BerkleyParser corpora from with approximately 17M sentences [37]. We used a vocabulary of 16K tokens for the WSJ only setting and a vocabulary of 32K tokens for the semi-supervised setting. We performed only a small number of experiments to select the dropout, both attention and residual (section 5.4), learning rates and beam size on the Section 22 development set, all other parameters remained unchanged from the English-to-German base translation model. During inference, we 9"
+      },
+      {
+        "source_number": 3,
+        "metadata": {
+          "page_number": 10,
+          "file_type": ".pdf",
+          "file_name": "1706.03762v7.pdf",
+          "file_path": "/workspace/data/documents/1706.03762v7.pdf",
+          "chunk_index": 16
+        },
+        "distance": 1.5875285863876343,
+        "text": "Mirella Lapata. Long short-term memory-networks for machine reading. arXiv preprint arXiv:1601.06733, 2016. 10"
+      },
+      {
+        "source_number": 4,
+        "metadata": {
+          "file_path": "/workspace/data/documents/1706.03762v7.pdf",
+          "chunk_index": 18,
+          "page_number": 12,
+          "file_type": ".pdf",
+          "file_name": "1706.03762v7.pdf"
+        },
+        "distance": 1.6233010292053223,
+        "text": "[25] Mitchell P Marcus, Mary Ann Marcinkiewicz, and Beatrice Santorini. Building a large annotated corpus of english: The penn treebank. Computational linguistics, 19(2):313\u2013330, 1993. [26] David McClosky, Eugene Charniak, and Mark Johnson. Effective self-training for parsing. In Proceedings of the Human Language Technology Conference of the NAACL, Main Conference , pages 152\u2013159. ACL, June 2006. [27] Ankur Parikh, Oscar T\u00e4ckstr\u00f6m, Dipanjan Das, and Jakob Uszkoreit. A decomposable attention model. In Empirical Methods in Natural Language Processing , 2016. [28] Romain Paulus, Caiming Xiong, and Richard Socher. A deep reinforced model for abstractive summarization. arXiv preprint arXiv:1705.04304, 2017. [29] Slav Petrov, Leon Barrett, Romain Thibaux, and Dan Klein. Learning accurate, compact, and interpretable tree annotation. In Proceedings of the 21st International Conference on Computational Linguistics and 44th Annual Meeting of the ACL , pages 433\u2013440. ACL, July 2006. [30] Ofir Press and Lior Wolf. Using the output embedding to improve language models. arXiv preprint arXiv:1608.05859, 2016. [31] Rico Sennrich, Barry Haddow, and Alexandra Birch. Neural machine translation of rare words with subword units. arXiv preprint arXiv:1508.07909, 2015. [32] Noam Shazeer, Azalia Mirhoseini, Krzysztof Maziarz, Andy Davis, Quoc Le, Geoffrey Hinton, and Jeff Dean. Outrageously large neural networks: The sparsely-gated mixture-of-experts layer. arXiv preprint arXiv:1701.06538, 2017. [33] Nitish Srivastava, Geoffrey E Hinton, Alex Krizhevsky, Ilya Sutskever, and Ruslan Salakhutdi- nov. Dropout: a simple way to prevent neural networks from overfitting. Journal of Machine Learning Research, 15(1):1929\u20131958, 2014. [34] Sainbayar Sukhbaatar, Arthur Szlam, Jason Weston, and Rob Fergus. End-to-end memory networks. In C. Cortes, N. D. Lawrence, D. Lee, M. Sugiyama, and R. Garnett, editors, Advances in Neural Information Processing Systems 28 , pages 2440\u20132448. Curran Associates, Inc., 2015. [35] Ilya Sutskever, Oriol Vinyals, and Quoc VV Le. Sequence to sequence learning with neural networks. In Advances in Neural Information Processing Systems , pages 3104\u20133112, 2014. [36] Christian Szegedy, Vincent Vanhoucke, Sergey Ioffe, Jonathon Shlens, and Zbigniew Wojna. Rethinking the inception architecture for computer vision. CoRR, abs/1512.00567, 2015. [37] Vinyals & Kaiser, Koo, Petrov, Sutskever, and Hinton. Grammar as a foreign language. In Advances in Neural Information Processing Systems , 2015. [38] Yonghui Wu, Mike Schuster, Zhifeng Chen, Quoc V Le, Mohammad Norouzi, Wolfgang Macherey, Maxim Krikun, Yuan Cao, Qin Gao, Klaus Macherey, et al. Google\u2019s neural machine translation system: Bridging the gap between human and machine translation. arXiv preprint arXiv:1609.08144, 2016. [39] Jie Zhou, Ying Cao, Xuguang Wang, Peng Li, and Wei Xu. Deep recurrent models with fast-forward connections for neural machine translation. CoRR, abs/1606.04199, 2016. [40] Muhua Zhu, Yue Zhang, Wenliang Chen, Min Zhang, and Jingbo Zhu. Fast and accurate shift-reduce constituent parsing. In Proceedings of the 51st Annual Meeting of the ACL (V olume 1: Long Papers), pages 434\u2013443. ACL, August 2013. 12"
+      },
+      {
+        "source_number": 5,
+        "metadata": {
+          "file_type": ".pdf",
+          "file_path": "/workspace/data/documents/1706.03762v7.pdf",
+          "page_number": 10,
+          "chunk_index": 15,
+          "file_name": "1706.03762v7.pdf"
+        },
+        "distance": 1.625392198562622,
+        "text": "Table 4: The Transformer generalizes well to English constituency parsing (Results are on Section 23 of WSJ) Parser Training WSJ 23 F1 Vinyals & Kaiser el al. (2014) [37] WSJ only, discriminative 88.3 Petrov et al. (2006) [29] WSJ only, discriminative 90.4 Zhu et al. (2013) [40] WSJ only, discriminative 90.4 Dyer et al. (2016) [8] WSJ only, discriminative 91.7 Transformer (4 layers) WSJ only, discriminative 91.3 Zhu et al. (2013) [40] semi-supervised 91.3 Huang & Harper (2009) [14] semi-supervised 91.3 McClosky et al. (2006) [26] semi-supervised 92.1 Vinyals & Kaiser el al. (2014) [37] semi-supervised 92.1 Transformer (4 layers) semi-supervised 92.7 Luong et al. (2015) [23] multi-task 93.0 Dyer et al. (2016) [8] generative 93.3 increased the maximum output length to input length + 300. We used a beam size of 21 and\u03b1 = 0.3 for both WSJ only and the semi-supervised setting. Our results in Table 4 show that despite the lack of task-specific tuning our model performs sur- prisingly well, yielding better results than all previously reported models with the exception of the Recurrent Neural Network Grammar [8]. In contrast to RNN sequence-to-sequence models [37], the Transformer outperforms the Berkeley- Parser [29] even when training only on the WSJ training set of 40K sentences. 7 Conclusion In this work, we presented the Transformer, the first sequence transduction model based entirely on attention, replacing the recurrent layers most commonly used in encoder-decoder architectures with multi-headed self-attention. For translation tasks, the Transformer can be trained significantly faster than architectures based on recurrent or convolutional layers. On both WMT 2014 English-to-German and WMT 2014 English-to-French translation tasks, we achieve a new state of the art. In the former task our best model outperforms even all previously reported ensembles. We are excited about the future of attention-based models and plan to apply them to other tasks. We plan to extend the Transformer to problems involving input and output modalities other than text and to investigate local, restricted attention mechanisms to efficiently handle large inputs and outputs such as images, audio and video. Making generation less sequential is another research goals of ours. The code we used to train and evaluate our models is available at https://github.com/ tensorflow/tensor2tensor. Acknowledgements We are grateful to Nal Kalchbrenner and Stephan Gouws for their fruitful comments, corrections and inspiration. References [1] Jimmy Lei Ba, Jamie Ryan Kiros, and Geoffrey E Hinton. Layer normalization. arXiv preprint arXiv:1607.06450, 2016. [2] Dzmitry Bahdanau, Kyunghyun Cho, and Yoshua Bengio. Neural machine translation by jointly learning to align and translate. CoRR, abs/1409.0473, 2014. [3] Denny Britz, Anna Goldie, Minh-Thang Luong, and Quoc V . Le. Massive exploration of neural machine translation architectures. CoRR, abs/1703.03906, 2017. [4] Jianpeng Cheng, Li Dong, and Mirella Lapata. Long short-term memory-networks for machine reading. arXiv preprint arXiv:1601.06733, 2016. 10"
       }
     ]
   }

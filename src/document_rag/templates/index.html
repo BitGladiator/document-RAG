@@ -6,6 +6,8 @@
 
     <title>Document RAG</title>
 
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -50,7 +52,6 @@
       }
 
       #answer {
-        white-space: pre-wrap;
         line-height: 1.6;
       }
 
@@ -199,7 +200,6 @@
         border-radius: 6px;
         border-left: 3px solid #2563eb;
         line-height: 1.6;
-        white-space: pre-wrap;
         font-size: 14px;
       }
 
@@ -250,8 +250,130 @@
       }
 
       .answer-body {
-        white-space: pre-wrap;
         line-height: 1.6;
+      }
+
+      #streamingText {
+        white-space: pre-wrap;
+      }
+
+      .table-container {
+        width: 100%;
+        overflow-x: auto;
+        margin: 16px 0;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #fff;
+      }
+
+      .table-container table,
+      .answer-body table,
+      .history-answer table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 14px;
+        line-height: 1.5;
+        background: #fff;
+      }
+
+      .table-container th,
+      .answer-body th,
+      .history-answer th {
+        background-color: #f3f4f6;
+        color: #111827;
+        font-weight: 600;
+        padding: 10px 14px;
+        border: 1px solid #d1d5db;
+        text-align: left;
+      }
+
+      .table-container td,
+      .answer-body td,
+      .history-answer td {
+        padding: 10px 14px;
+        border: 1px solid #e5e7eb;
+        vertical-align: top;
+        color: #374151;
+      }
+
+      .table-container tr:nth-child(even),
+      .answer-body tr:nth-child(even),
+      .history-answer tr:nth-child(even) {
+        background-color: #f9fafb;
+      }
+
+      .table-container tr:hover,
+      .answer-body tr:hover,
+      .history-answer tr:hover {
+        background-color: #f3f4f6;
+      }
+
+      .answer-body ul,
+      .answer-body ol,
+      .history-answer ul,
+      .history-answer ol {
+        margin: 10px 0;
+        padding-left: 24px;
+      }
+
+      .answer-body li,
+      .history-answer li {
+        margin-bottom: 6px;
+      }
+
+      .answer-body p,
+      .history-answer p {
+        margin: 10px 0;
+      }
+
+      .answer-body p:first-child,
+      .history-answer p:first-child {
+        margin-top: 0;
+      }
+
+      .answer-body p:last-child,
+      .history-answer p:last-child {
+        margin-bottom: 0;
+      }
+
+      .answer-body h1,
+      .answer-body h2,
+      .answer-body h3,
+      .answer-body h4,
+      .history-answer h1,
+      .history-answer h2,
+      .history-answer h3,
+      .history-answer h4 {
+        margin: 16px 0 8px 0;
+        color: #111827;
+      }
+
+      .answer-body code,
+      .history-answer code {
+        background: #e5e7eb;
+        color: #1f2937;
+        padding: 2px 5px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 13px;
+      }
+
+      .answer-body pre,
+      .history-answer pre {
+        background: #1f2937;
+        color: #f9fafb;
+        padding: 12px;
+        border-radius: 6px;
+        overflow-x: auto;
+        margin: 12px 0;
+      }
+
+      .answer-body pre code,
+      .history-answer pre code {
+        background: transparent;
+        padding: 0;
+        color: inherit;
       }
 
       #stopBtn {
@@ -542,46 +664,213 @@
         }
       }
 
-      function renderAnswerWithCitations(text, targetElement = null) {
-        const answer = targetElement || document.getElementById("answer");
+      function fallbackMarkdown(text) {
+        const lines = text.split("\n");
+        const out = [];
+        let inList = false;
+        let inOrderedList = false;
+        let inTable = false;
+        let inCodeBlock = false;
+        let tableHeaders = [];
+        let tableRows = [];
 
-        answer.innerHTML = "";
+        function formatInline(str) {
+          return str
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/`([^`]+)`/g, "<code>$1</code>")
+            .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+            .replace(/__([^_]+)__/g, "<strong>$1</strong>")
+            .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+            .replace(/_([^_]+)_/g, "<em>$1</em>");
+        }
 
-        const parts = text.split(/(\[Source\s+\d+\])/g);
-
-        for (const part of parts) {
-          const match = part.match(/^\[Source\s+(\d+)\]$/);
-
-          if (match) {
-            const button = document.createElement("button");
-
-            button.className = "citation";
-            button.type = "button";
-            button.textContent = `Source ${match[1]}`;
-
-            button.addEventListener("click", () => {
-              const source = document.getElementById(`source-${match[1]}`);
-
-              if (source) {
-                source.scrollIntoView({
-                  behavior: "smooth",
-                  block: "center",
-                });
-
-                source.classList.add("source-highlight");
-
-                setTimeout(() => {
-                  source.classList.remove("source-highlight");
-                }, 1200);
-              }
-            });
-
-            answer.appendChild(button);
-          } else {
-            answer.appendChild(document.createTextNode(part));
+        function flushList() {
+          if (inList) {
+            out.push("</ul>");
+            inList = false;
+          }
+          if (inOrderedList) {
+            out.push("</ol>");
+            inOrderedList = false;
           }
         }
+
+        function flushTable() {
+          if (inTable) {
+            let tHtml = "<table><thead><tr>";
+            for (const h of tableHeaders) {
+              tHtml += `<th>${formatInline(h.trim())}</th>`;
+            }
+            tHtml += "</tr></thead><tbody>";
+            for (const row of tableRows) {
+              tHtml += "<tr>";
+              for (const cell of row) {
+                tHtml += `<td>${formatInline(cell.trim())}</td>`;
+              }
+              tHtml += "</tr>";
+            }
+            tHtml += "</tbody></table>";
+            out.push(tHtml);
+            inTable = false;
+            tableHeaders = [];
+            tableRows = [];
+          }
+        }
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          const trimmed = line.trim();
+
+          if (trimmed.startsWith("```")) {
+            flushList();
+            flushTable();
+            if (inCodeBlock) {
+              out.push("</code></pre>");
+              inCodeBlock = false;
+            } else {
+              out.push("<pre><code>");
+              inCodeBlock = true;
+            }
+            continue;
+          }
+
+          if (inCodeBlock) {
+            out.push(line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + "\n");
+            continue;
+          }
+
+          if (!trimmed) {
+            flushList();
+            flushTable();
+            continue;
+          }
+
+          if (trimmed.includes("|")) {
+            const isDelim = /^\|?(\s*:?-+:?\s*\|?)+$/.test(trimmed);
+            if (!inTable && !isDelim && i + 1 < lines.length && /^\|?(\s*:?-+:?\s*\|?)+$/.test(lines[i + 1].trim())) {
+              flushList();
+              inTable = true;
+              let row = trimmed;
+              if (row.startsWith("|")) row = row.slice(1);
+              if (row.endsWith("|")) row = row.slice(0, -1);
+              tableHeaders = row.split("|");
+              i++;
+              continue;
+            } else if (inTable) {
+              let row = trimmed;
+              if (row.startsWith("|")) row = row.slice(1);
+              if (row.endsWith("|")) row = row.slice(0, -1);
+              tableRows.push(row.split("|"));
+              continue;
+            }
+          }
+
+          flushTable();
+
+          if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+            if (inOrderedList) flushList();
+            if (!inList) {
+              inList = true;
+              out.push("<ul>");
+            }
+            out.push(`<li>${formatInline(trimmed.slice(2))}</li>`);
+            continue;
+          }
+
+          const olMatch = trimmed.match(/^(\d+)\.\s+(.*)$/);
+          if (olMatch) {
+            if (inList) flushList();
+            if (!inOrderedList) {
+              inOrderedList = true;
+              out.push("<ol>");
+            }
+            out.push(`<li>${formatInline(olMatch[2])}</li>`);
+            continue;
+          }
+
+          flushList();
+
+          if (trimmed.startsWith("#### ")) {
+            out.push(`<h4>${formatInline(trimmed.slice(5))}</h4>`);
+            continue;
+          }
+          if (trimmed.startsWith("### ")) {
+            out.push(`<h3>${formatInline(trimmed.slice(4))}</h3>`);
+            continue;
+          }
+          if (trimmed.startsWith("## ")) {
+            out.push(`<h2>${formatInline(trimmed.slice(3))}</h2>`);
+            continue;
+          }
+          if (trimmed.startsWith("# ")) {
+            out.push(`<h1>${formatInline(trimmed.slice(2))}</h1>`);
+            continue;
+          }
+
+          out.push(`<p>${formatInline(trimmed)}</p>`);
+        }
+
+        flushList();
+        flushTable();
+        if (inCodeBlock) {
+          out.push("</code></pre>");
+        }
+
+        return out.join("");
       }
+
+      function formatMarkdown(text) {
+        if (!text) return "";
+        let html = "";
+        if (typeof marked !== "undefined") {
+          try {
+            if (typeof marked.parse === "function") {
+              html = marked.parse(text, { breaks: true, gfm: true });
+            } else if (typeof marked === "function") {
+              html = marked(text);
+            } else {
+              html = fallbackMarkdown(text);
+            }
+          } catch (e) {
+            html = fallbackMarkdown(text);
+          }
+        } else {
+          html = fallbackMarkdown(text);
+        }
+
+        if (!html.includes('class="table-container"')) {
+          html = html.replace(/<table(\s*|>)/g, '<div class="table-container"><table$1');
+          html = html.replace(/<\/table>/g, "</table></div>");
+        }
+
+        html = html.replace(/\[Source[\s\u00a0\u202f]+(\d+)\]/gi, '<button type="button" class="citation" data-source="$1">Source $1</button>');
+        return html;
+      }
+
+      function renderAnswerWithCitations(text, targetElement = null) {
+        const answer = targetElement || document.getElementById("answer");
+        answer.innerHTML = formatMarkdown(text);
+      }
+
+      document.addEventListener("click", (e) => {
+        const button = e.target.closest(".citation");
+        if (!button) return;
+        const sourceId = button.getAttribute("data-source");
+        if (!sourceId) return;
+        const source = document.getElementById(`source-${sourceId}`);
+        if (source) {
+          source.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+          source.classList.add("source-highlight");
+          setTimeout(() => {
+            source.classList.remove("source-highlight");
+          }, 1200);
+        }
+      });
 
       let currentAbortController = null;
 
@@ -821,7 +1110,7 @@
                   <span>${escapeHtml(item.timestamp || "")}</span>
                 </span>
               </div>
-              <div class="history-answer">${escapeHtml(item.answer || "")}</div>
+              <div class="history-answer">${formatMarkdown(item.answer || "")}</div>
               ${sourcesHtml}
             `;
 
