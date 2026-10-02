@@ -9,224 +9,432 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
+      *, *::before, *::after {
+        box-sizing: border-box;
+      }
+
       body {
-        font-family: Arial, sans-serif;
-        max-width: 1000px;
-        margin: 40px auto;
-        padding: 0 20px;
-        background: #fafafa;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f8fafc;
+        color: #0f172a;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
       }
 
-      h1 {
-        margin-bottom: 5px;
+      .app-container {
+        max-width: 1200px;
+        margin: 32px auto;
+        padding: 0 24px 60px 24px;
       }
 
-      .section {
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 12px;
+      .app-header {
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .app-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 4px 0;
+        letter-spacing: -0.01em;
+      }
+
+      .app-subtitle {
+        font-size: 14px;
+        color: #64748b;
+        margin: 0;
+      }
+
+      .app-layout {
+        display: grid;
+        grid-template-columns: 330px 1fr;
+        gap: 24px;
+        align-items: start;
+      }
+
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .main-content {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        min-width: 0;
+      }
+
+      .panel {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
         padding: 20px;
-        margin-top: 20px;
       }
 
-      button {
-        padding: 9px 14px;
-        cursor: pointer;
-        border: 1px solid #bbb;
-        border-radius: 6px;
-        background: white;
-      }
-
-      button:hover {
-        background: #f0f0f0;
-      }
-
-      input {
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-      }
-
-      #question {
-        width: 70%;
-      }
-
-      #answer {
-        line-height: 1.6;
-      }
-
-      .document {
+      .panel-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 12px;
-        border-bottom: 1px solid #eee;
+        margin-bottom: 16px;
       }
 
-      .document:last-child {
-        border-bottom: none;
+      .panel-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #0f172a;
+        margin: 0;
       }
 
-      .source {
-        background: #f5f5f5;
-        border: 1px solid #ddd;
-        padding: 14px;
-        margin-top: 10px;
-        border-radius: 8px;
-        line-height: 1.6;
+      .panel-subtitle {
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin: 20px 0 10px 0;
+      }
+
+      .panel-section-docs {
+        border-top: 1px solid #f1f5f9;
+        margin-top: 16px;
+        padding-top: 4px;
+      }
+
+      .form-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 4px;
+      }
+
+      .file-hint {
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 12px;
+      }
+
+      .upload-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .file-input {
+        font-size: 13px;
+        color: #475569;
+        width: 100%;
+      }
+
+      .file-input::file-selector-button {
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 500;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: #ffffff;
+        color: #334155;
+        cursor: pointer;
+        margin-right: 8px;
+        transition: all 0.15s ease;
+      }
+
+      .file-input::file-selector-button:hover {
+        background: #f1f5f9;
+        border-color: #94a3b8;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 500;
+        border-radius: 6px;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        text-decoration: none;
+        line-height: 1.4;
+      }
+
+      .btn-primary {
+        background: #2563eb;
+        color: #ffffff;
+        border-color: #2563eb;
+      }
+
+      .btn-primary:hover:not(:disabled) {
+        background: #1d4ed8;
+        border-color: #1d4ed8;
+      }
+
+      .btn-primary:disabled {
+        background: #93c5fd;
+        border-color: #93c5fd;
+        cursor: not-allowed;
+      }
+
+      .btn-secondary {
+        background: #ffffff;
+        color: #334155;
+        border-color: #cbd5e1;
+      }
+
+      .btn-secondary:hover {
+        background: #f8fafc;
+        border-color: #94a3b8;
+      }
+
+      .btn-danger {
+        background: #fee2e2;
+        color: #b91c1c;
+        border-color: #fca5a5;
+      }
+
+      .btn-danger:hover {
+        background: #fecaca;
+        border-color: #f87171;
+      }
+
+      .btn-ghost-danger {
+        background: transparent;
+        color: #64748b;
+        border-color: #e2e8f0;
+      }
+
+      .btn-ghost-danger:hover {
+        background: #fef2f2;
+        color: #b91c1c;
+        border-color: #fecaca;
       }
 
       .status {
         margin-top: 10px;
-        font-weight: bold;
-      }
-
-      .empty {
-        color: #777;
-      }
-      .source-text {
-        margin-top: 10px;
-        padding: 10px;
-        border-radius: 6px;
-        background: #f5f5f5;
-        font-size: 14px;
-        line-height: 1.5;
-        white-space: pre-wrap;
-      }
-      .source-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-      }
-
-      .source-header strong {
-        font-size: 16px;
-      }
-
-      .distance {
-        font-size: 13px;
-        color: #666;
-      }
-
-      .source-file {
-        font-weight: bold;
-        margin-bottom: 4px;
-      }
-
-      .source-meta {
-        font-size: 13px;
-        color: #666;
-      }
-
-      .source {
-        transition: transform 0.15s ease;
-      }
-      .citation {
-        border: none;
-        background: none;
-        padding: 0;
-        margin: 0 3px;
-        font: inherit;
-        font-weight: bold;
-        cursor: pointer;
-        text-decoration: underline;
-      }
-
-      .citation:hover {
-        opacity: 0.7;
-      }
-
-      .source-highlight {
-        transform: scale(1.01);
-      }
-
-      .source:hover {
-        transform: translateY(-2px);
-      }
-
-      .history-header-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
-      }
-
-      .history-item {
-        border-bottom: 1px solid #e5e5e5;
-        padding: 16px 0;
-      }
-
-      .history-item:last-child {
-        border-bottom: none;
-      }
-
-      .history-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-
-      .history-query {
-        font-weight: bold;
-        font-size: 15px;
-        color: #1f2937;
-      }
-
-      .history-meta {
-        font-size: 12px;
-        color: #6b7280;
-        display: flex;
-        gap: 8px;
-        align-items: center;
-      }
-
-      .history-badge {
-        display: inline-block;
-        background: #e0e7ff;
-        color: #3730a3;
-        font-size: 11px;
-        font-weight: 600;
-        padding: 2px 6px;
-        border-radius: 4px;
-      }
-
-      .history-answer {
-        margin-top: 8px;
-        padding: 12px 14px;
-        background: #f9fafb;
-        border-radius: 6px;
-        border-left: 3px solid #2563eb;
-        line-height: 1.6;
-        font-size: 14px;
-      }
-
-      .history-sources {
-        margin-top: 8px;
-        font-size: 13px;
-      }
-
-      .history-sources summary {
-        cursor: pointer;
-        color: #4b5563;
-        font-weight: 600;
-        user-select: none;
-      }
-
-      .history-sources-list {
-        margin-top: 6px;
-        padding-left: 10px;
-      }
-
-      .history-source-item {
-        background: #f3f4f6;
-        padding: 8px 10px;
-        border-radius: 4px;
-        margin-bottom: 6px;
         font-size: 12px;
         line-height: 1.4;
+        border-radius: 6px;
+        padding: 0;
+        display: none;
+      }
+
+      .status.visible {
+        display: block;
+        padding: 8px 10px;
+      }
+
+      .status.status-loading {
+        background: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+      }
+
+      .status.status-success {
+        background: #f0fdf4;
+        color: #15803d;
+        border: 1px solid #bbf7d0;
+      }
+
+      .status.status-error {
+        background: #fef2f2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+      }
+
+      .document-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .document-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        transition: all 0.15s ease;
+      }
+
+      .document-item:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+      }
+
+      .document-info {
+        min-width: 0;
+        flex: 1;
+      }
+
+      .document-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: #0f172a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .document-meta {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 2px;
+        font-size: 11px;
+        color: #64748b;
+      }
+
+      .document-type-badge {
+        display: inline-block;
+        background: #f1f5f9;
+        color: #475569;
+        padding: 1px 4px;
+        border-radius: 3px;
+        font-weight: 600;
+        font-size: 10px;
+      }
+
+      .btn-delete {
+        padding: 4px 8px;
+        font-size: 12px;
+        color: #64748b;
+        background: transparent;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: all 0.15s ease;
+      }
+
+      .btn-delete:hover {
+        color: #dc2626;
+        border-color: #fecaca;
+        background: #fef2f2;
+      }
+
+      .ask-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .scope-selector {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .scope-label {
+        font-size: 13px;
+        font-weight: 500;
+        color: #64748b;
+      }
+
+      .form-select {
+        padding: 6px 12px;
+        font-size: 13px;
+        color: #1e293b;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        cursor: pointer;
+        outline: none;
+        transition: border-color 0.15s ease;
+      }
+
+      .form-select:focus {
+        border-color: #2563eb;
+      }
+
+      .question-input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 6px 8px 6px 14px;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      .question-input-wrapper:focus-within {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      }
+
+      .question-input {
+        flex: 1;
+        border: none;
+        outline: none;
+        font-size: 15px;
+        color: #0f172a;
+        background: transparent;
+        padding: 6px 0;
+      }
+
+      .question-input::placeholder {
+        color: #94a3b8;
+      }
+
+      .generating-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        color: #2563eb;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        padding: 3px 10px;
+        border-radius: 9999px;
+      }
+
+      .generating-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #2563eb;
+        animation: pulse 1.4s infinite ease-in-out;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 0.3; transform: scale(0.85); }
+        50% { opacity: 1; transform: scale(1.15); }
+      }
+
+      .answer-content {
+        line-height: 1.65;
+        font-size: 15px;
+        color: #1e293b;
+      }
+
+      .current-question {
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 12px;
+        font-size: 15px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #f1f5f9;
+      }
+
+      .answer-body {
+        line-height: 1.65;
+      }
+
+      #streamingText {
+        white-space: pre-wrap;
       }
 
       .streaming-cursor {
@@ -242,28 +450,137 @@
         50% { opacity: 0; }
       }
 
-      .current-question {
-        font-weight: bold;
-        color: #1f2937;
+      .empty {
+        color: #64748b;
+        font-size: 13.5px;
+        text-align: center;
+        padding: 24px 16px;
+        background: #f8fafc;
+        border: 1px dashed #e2e8f0;
+        border-radius: 6px;
+        line-height: 1.5;
+      }
+
+      .empty-sub {
+        display: block;
+        font-size: 12px;
+        color: #94a3b8;
+        margin-top: 4px;
+      }
+
+      .citation {
+        display: inline-flex;
+        align-items: center;
+        padding: 1px 6px;
+        margin: 0 3px;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.4;
+        color: #1d4ed8;
+        background-color: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 4px;
+        cursor: pointer;
+        vertical-align: baseline;
+        text-decoration: none;
+        transition: all 0.15s ease;
+      }
+
+      .citation:hover {
+        background-color: #dbeafe;
+        border-color: #93c5fd;
+        color: #1e40af;
+        transform: translateY(-1px);
+      }
+
+      .citation:active {
+        transform: translateY(0);
+      }
+
+      .sources-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .source {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 14px 16px;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.25s ease;
+      }
+
+      .source:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+      }
+
+      .source-highlight {
+        border-color: #f59e0b !important;
+        background-color: #fffbeb !important;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2) !important;
+      }
+
+      .source-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+      }
+
+      .source-badge {
+        font-size: 13px;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .source-distance {
+        font-size: 12px;
+        color: #64748b;
+      }
+
+      .source-file {
+        font-size: 14px;
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 2px;
+      }
+
+      .source-meta {
+        font-size: 12px;
+        color: #64748b;
         margin-bottom: 8px;
-        font-size: 15px;
       }
 
-      .answer-body {
-        line-height: 1.6;
+      .source-text-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 4px;
       }
 
-      #streamingText {
+      .source-text {
+        padding: 10px 12px;
+        border-radius: 6px;
+        background: #f8fafc;
+        border: 1px solid #f1f5f9;
+        font-size: 13px;
+        line-height: 1.55;
         white-space: pre-wrap;
+        color: #334155;
       }
 
       .table-container {
         width: 100%;
         overflow-x: auto;
         margin: 16px 0;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        background: #ffffff;
       }
 
       .table-container table,
@@ -272,19 +589,19 @@
         width: 100%;
         border-collapse: collapse;
         text-align: left;
-        font-size: 14px;
+        font-size: 13.5px;
         line-height: 1.5;
-        background: #fff;
+        background: #ffffff;
       }
 
       .table-container th,
       .answer-body th,
       .history-answer th {
-        background-color: #f3f4f6;
-        color: #111827;
+        background-color: #f8fafc;
+        color: #0f172a;
         font-weight: 600;
         padding: 10px 14px;
-        border: 1px solid #d1d5db;
+        border: 1px solid #e2e8f0;
         text-align: left;
       }
 
@@ -292,21 +609,21 @@
       .answer-body td,
       .history-answer td {
         padding: 10px 14px;
-        border: 1px solid #e5e7eb;
+        border: 1px solid #e2e8f0;
         vertical-align: top;
-        color: #374151;
+        color: #334155;
       }
 
       .table-container tr:nth-child(even),
       .answer-body tr:nth-child(even),
       .history-answer tr:nth-child(even) {
-        background-color: #f9fafb;
+        background-color: #fcfcfd;
       }
 
       .table-container tr:hover,
       .answer-body tr:hover,
       .history-answer tr:hover {
-        background-color: #f3f4f6;
+        background-color: #f8fafc;
       }
 
       .answer-body ul,
@@ -314,12 +631,12 @@
       .history-answer ul,
       .history-answer ol {
         margin: 10px 0;
-        padding-left: 24px;
+        padding-left: 22px;
       }
 
       .answer-body li,
       .history-answer li {
-        margin-bottom: 6px;
+        margin-bottom: 5px;
       }
 
       .answer-body p,
@@ -346,24 +663,24 @@
       .history-answer h3,
       .history-answer h4 {
         margin: 16px 0 8px 0;
-        color: #111827;
+        color: #0f172a;
       }
 
       .answer-body code,
       .history-answer code {
-        background: #e5e7eb;
-        color: #1f2937;
+        background: #f1f5f9;
+        color: #0f172a;
         padding: 2px 5px;
         border-radius: 4px;
-        font-family: monospace;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         font-size: 13px;
       }
 
       .answer-body pre,
       .history-answer pre {
-        background: #1f2937;
-        color: #f9fafb;
-        padding: 12px;
+        background: #0f172a;
+        color: #f8fafc;
+        padding: 12px 14px;
         border-radius: 6px;
         overflow-x: auto;
         margin: 12px 0;
@@ -376,98 +693,254 @@
         color: inherit;
       }
 
-      #stopBtn {
-        background: #fee2e2;
-        color: #b91c1c;
-        border-color: #fca5a5;
-        margin-left: 6px;
+      .history-list {
+        display: flex;
+        flex-direction: column;
       }
 
-      #stopBtn:hover {
-        background: #fecaca;
+      .history-item {
+        border-bottom: 1px solid #e2e8f0;
+        padding: 18px 0;
+      }
+
+      .history-item:first-child {
+        padding-top: 0;
+      }
+
+      .history-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+
+      .history-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .history-query {
+        font-weight: 600;
+        font-size: 14.5px;
+        color: #0f172a;
+      }
+
+      .history-meta {
+        font-size: 12px;
+        color: #64748b;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .history-badge {
+        display: inline-block;
+        background: #f1f5f9;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 6px;
+        border-radius: 4px;
+        border: 1px solid #e2e8f0;
+      }
+
+      .history-time {
+        font-size: 12px;
+        color: #94a3b8;
+      }
+
+      .history-answer {
+        margin-top: 10px;
+        padding: 12px 16px;
+        background: #f8fafc;
+        border-radius: 6px;
+        border-left: 3px solid #3b82f6;
+        line-height: 1.6;
+        font-size: 14px;
+        color: #1e293b;
+      }
+
+      .history-sources {
+        margin-top: 10px;
+        font-size: 13px;
+      }
+
+      .history-sources summary {
+        cursor: pointer;
+        color: #475569;
+        font-weight: 500;
+        user-select: none;
+      }
+
+      .history-sources summary:hover {
+        color: #0f172a;
+      }
+
+      .history-sources-list {
+        margin-top: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding-left: 12px;
+      }
+
+      .history-source-item {
+        background: #f1f5f9;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        line-height: 1.45;
+        border-left: 2px solid #cbd5e1;
+      }
+
+      .history-source-title {
+        color: #0f172a;
+        margin-bottom: 2px;
+      }
+
+      .history-source-chunk {
+        color: #64748b;
+      }
+
+      .history-source-text {
+        color: #475569;
+        font-style: italic;
+      }
+
+      @media (max-width: 860px) {
+        .app-container {
+          margin: 16px auto;
+          padding: 0 16px 40px 16px;
+        }
+
+        .app-layout {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+
+        .ask-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .question-input-wrapper {
+          flex-direction: column;
+          align-items: stretch;
+          padding: 10px;
+        }
+
+        .question-input {
+          padding: 4px 0;
+        }
       }
     </style>
   </head>
 
   <body>
-    <h1>Document RAG</h1>
+    <div class="app-container">
+      <header class="app-header">
+        <h1 class="app-title">Document RAG</h1>
+        <p class="app-subtitle">Research and ask questions across your documents.</p>
+      </header>
 
-    <p>Upload documents and ask questions about them.</p>
+      <div class="app-layout">
+        <aside class="sidebar">
+          <div class="panel">
+            <div class="panel-header">
+              <h2 class="panel-title">Documents</h2>
+            </div>
 
-    <div class="section">
-      <h2>Upload Document</h2>
+            <div class="panel-section">
+              <label class="form-label" for="file">Upload a document</label>
+              <div class="file-hint">Supported formats: PDF, DOCX, TXT</div>
+              <div class="upload-controls">
+                <input type="file" id="file" class="file-input" accept=".pdf,.docx,.txt" />
+                <button type="button" class="btn btn-secondary" onclick="uploadDocument()">Upload</button>
+              </div>
+              <div id="uploadStatus" class="status"></div>
+            </div>
 
-      <input type="file" id="file" accept=".pdf,.docx,.txt" />
+            <div class="panel-section panel-section-docs">
+              <h3 class="panel-subtitle">Your documents</h3>
+              <div id="documents" class="document-list">Loading documents...</div>
+            </div>
+          </div>
+        </aside>
 
-      <button onclick="uploadDocument()">Upload</button>
+        <main class="main-content">
+          <section class="panel ask-panel">
+            <div class="ask-header">
+              <h2 class="panel-title">Ask your documents</h2>
+              <div class="scope-selector">
+                <label for="documentSelect" class="scope-label">Document:</label>
+                <select id="documentSelect" class="form-select">
+                  <option value="">All documents</option>
+                </select>
+              </div>
+            </div>
 
-      <div id="uploadStatus" class="status"></div>
-    </div>
+            <div class="question-input-wrapper">
+              <input
+                type="text"
+                id="question"
+                class="question-input"
+                placeholder="Ask a question about your documents..."
+                autocomplete="off"
+              />
+              <button id="askBtn" class="btn btn-primary" onclick="askQuestion()">Ask</button>
+              <button id="stopBtn" class="btn btn-danger" onclick="stopGeneration()" style="display: none;">Stop generating</button>
+            </div>
+          </section>
 
-    <div class="section">
-      <h2>Documents</h2>
+          <section class="panel answer-panel">
+            <div class="panel-header">
+              <h2 class="panel-title">Answer</h2>
+              <div id="generatingBadge" class="generating-badge" style="display: none;">
+                <span class="generating-dot"></span>
+                <span>Generating answer...</span>
+              </div>
+            </div>
+            <div id="answer" class="answer-content">
+              <div class="empty">Ask a question to see an answer here.</div>
+            </div>
+          </section>
 
-      <div id="documents">Loading...</div>
-    </div>
+          <section class="panel sources-panel">
+            <div class="panel-header">
+              <h2 class="panel-title">Sources</h2>
+            </div>
+            <div id="sources" class="sources-list">
+              <div class="empty">No sources yet.</div>
+            </div>
+          </section>
 
-    <div class="section">
-      <h2>Ask a Question</h2>
-
-      <label for="documentSelect"> Document: </label>
-
-      <select id="documentSelect">
-        <option value="">All documents</option>
-      </select>
-
-      <br /><br />
-
-      <input
-        type="text"
-        id="question"
-        placeholder="Ask something about your documents..."
-      />
-
-      <button id="askBtn" onclick="askQuestion()">Ask</button>
-      <button id="stopBtn" onclick="stopGeneration()" style="display: none;">Stop generating</button>
-    </div>
-
-    <div class="section">
-      <h2>Answer</h2>
-
-      <div id="answer">No question asked yet.</div>
-    </div>
-
-    <div class="section">
-      <h2>Sources</h2>
-
-      <div id="sources">No sources yet.</div>
-    </div>
-
-    <div class="section">
-      <div class="history-header-bar">
-        <h2>Chat History (Memory)</h2>
-        <button onclick="clearChatHistory()" id="clearHistoryBtn">Clear History</button>
+          <section class="panel history-panel">
+            <div class="panel-header">
+              <h2 class="panel-title">Chat History (Memory)</h2>
+              <button id="clearHistoryBtn" class="btn btn-ghost-danger" onclick="clearChatHistory()">Clear History</button>
+            </div>
+            <div id="chatHistory" class="history-list">Loading memory...</div>
+          </section>
+        </main>
       </div>
-
-      <div id="chatHistory">Loading memory...</div>
     </div>
 
     <script>
       async function uploadDocument() {
         const fileInput = document.getElementById("file");
-
         const status = document.getElementById("uploadStatus");
 
         if (!fileInput.files.length) {
+          status.className = "status status-error visible";
           status.textContent = "Please select a file.";
-
           return;
         }
 
         const formData = new FormData();
-
         formData.append("file", fileInput.files[0]);
 
+        status.className = "status status-loading visible";
         status.textContent = "Uploading...";
 
         try {
@@ -479,21 +952,22 @@
           const data = await response.json();
 
           if (!response.ok) {
-            status.textContent = data.error;
-
+            status.className = "status status-error visible";
+            status.textContent = data.error || "Upload failed.";
             return;
           }
 
+          status.className = "status status-success visible";
           status.textContent =
             `${data.file_name} uploaded successfully. ` +
             `${data.chunks_indexed} chunks indexed.`;
 
           fileInput.value = "";
-
           loadDocuments();
+          loadDocumentSelector();
         } catch (error) {
+          status.className = "status status-error visible";
           status.textContent = "Upload failed.";
-
           console.error(error);
         }
       }
@@ -503,51 +977,42 @@
 
         try {
           const response = await fetch("/documents");
-
           const data = await response.json();
 
           container.innerHTML = "";
 
-          if (!data.documents.length) {
+          if (!data.documents || !data.documents.length) {
             container.innerHTML =
-              '<div class="empty">No documents indexed.</div>';
-
+              '<div class="empty">No documents yet.<br><span class="empty-sub">Upload a PDF, DOCX, or TXT file to get started.</span></div>';
             return;
           }
 
           for (const doc of data.documents) {
             const div = document.createElement("div");
-
-            div.className = "document";
+            div.className = "document-item";
+            const typeName = (doc.file_type || "").replace(/^\./, "").toUpperCase() || "DOC";
 
             div.innerHTML = `
-                    <div>
-                        <strong>
-                            ${doc.file_name}
-                        </strong>
-
-                        <br>
-
-                        <small>
-                            ${doc.file_type}
-                            ·
-                            ${doc.chunks} chunks
-                        </small>
-                    </div>
-
-                    <button
-                        onclick="deleteDocument(
-                            '${encodeURIComponent(doc.file_name)}'
-                        )">
-                        Delete
-                    </button>
-                `;
+              <div class="document-info">
+                <div class="document-name" title="${escapeHtml(doc.file_name)}">${escapeHtml(doc.file_name)}</div>
+                <div class="document-meta">
+                  <span class="document-type-badge">${escapeHtml(typeName)}</span>
+                  <span>${doc.chunks} chunk${doc.chunks === 1 ? "" : "s"}</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="btn-delete"
+                title="Delete document"
+                onclick="deleteDocument('${encodeURIComponent(doc.file_name)}')">
+                Delete
+              </button>
+            `;
 
             container.appendChild(div);
           }
         } catch (error) {
-          container.textContent = "Could not load documents.";
-
+          container.innerHTML = '<div class="empty">Could not load documents.</div>';
           console.error(error);
         }
       }
@@ -566,42 +1031,37 @@
 
           if (!response.ok) {
             alert(data.error || "Delete failed.");
-
             return;
           }
 
           loadDocuments();
+          loadDocumentSelector();
         } catch (error) {
           alert("Delete failed.");
-
           console.error(error);
         }
       }
+
       async function loadDocumentSelector() {
         const select = document.getElementById("documentSelect");
 
         try {
           const response = await fetch("/documents");
-
           const data = await response.json();
 
-          select.innerHTML = `
-                  <option value="">All documents</option>
-                `;
+          select.innerHTML = '<option value="">All documents</option>';
 
-          for (const doc of data.documents) {
+          for (const doc of data.documents || []) {
             const option = document.createElement("option");
-
             option.value = doc.file_path;
-
             option.textContent = doc.file_name;
-
             select.appendChild(option);
           }
         } catch (error) {
           console.error("Could not load document selector:", error);
         }
       }
+
       function escapeHtml(text) {
         if (!text) return "";
         const div = document.createElement("div");
@@ -614,50 +1074,35 @@
         sources.innerHTML = "";
 
         if (!sourcesList || sourcesList.length === 0) {
-          sources.innerHTML =
-            '<div class="empty">No relevant sources found.</div>';
+          sources.innerHTML = '<div class="empty">No relevant sources found.</div>';
           return;
         }
 
         for (const source of sourcesList) {
           const div = document.createElement("div");
-
           div.className = "source";
           div.id = `source-${source.source_number}`;
           const metadata = source.metadata || {};
 
-          const fileName =
-            metadata.file_name || metadata.file_path || "Unknown file";
-
+          const fileName = metadata.file_name || metadata.file_path || "Unknown file";
           const chunk = metadata.chunk_index ?? "Unknown";
-
           const page = metadata.page_number;
-
           const distance = source.distance;
+          const distFormatted = distance !== undefined ? distance.toFixed(4) : "N/A";
           const text = source.text || "No source text available.";
+
           div.innerHTML = `
             <div class="source-header">
-              <strong>
-                Source ${source.source_number}
-              </strong>
-
-              <span class="distance">
-                Distance:
-                ${distance !== undefined ? distance.toFixed(4) : "N/A"}
-              </span>
+              <span class="source-badge">Source ${source.source_number}</span>
+              <span class="source-distance">Distance: ${distFormatted}</span>
             </div>
-
-            <div class="source-file">
-              ${escapeHtml(fileName)}
-            </div>
-
+            <div class="source-file" title="${escapeHtml(fileName)}">${escapeHtml(fileName)}</div>
             <div class="source-meta">
-              Chunk: ${chunk}
-              ${page ? ` · Page: ${page}` : ""}
+              <span>Chunk ${chunk}</span>
+              ${page ? `<span> · Page ${page}</span>` : ""}
             </div>
-            <div class="source-text">
-              ${escapeHtml(text)}
-            </div>
+            <div class="source-text-label">Retrieved text:</div>
+            <div class="source-text">${escapeHtml(text)}</div>
           `;
 
           sources.appendChild(div);
@@ -877,13 +1322,16 @@
       function setGeneratingState(isGenerating) {
         const askBtn = document.getElementById("askBtn");
         const stopBtn = document.getElementById("stopBtn");
+        const badge = document.getElementById("generatingBadge");
 
         if (isGenerating) {
           if (askBtn) askBtn.disabled = true;
-          if (stopBtn) stopBtn.style.display = "inline-block";
+          if (stopBtn) stopBtn.style.display = "inline-flex";
+          if (badge) badge.style.display = "inline-flex";
         } else {
           if (askBtn) askBtn.disabled = false;
           if (stopBtn) stopBtn.style.display = "none";
+          if (badge) badge.style.display = "none";
           currentAbortController = null;
         }
       }
@@ -906,7 +1354,7 @@
         const sources = document.getElementById("sources");
 
         if (!question) {
-          answer.textContent = "Please enter a question.";
+          answer.innerHTML = '<div class="empty">Please enter a question.</div>';
           return;
         }
 
@@ -916,7 +1364,7 @@
           <div class="current-question">Q: ${escapeHtml(question)}</div>
           <div class="answer-body"><span id="streamingText"></span><span id="streamingCursor" class="streaming-cursor">▌</span></div>
         `;
-        sources.innerHTML = '<span class="empty">Searching documents...</span>';
+        sources.innerHTML = '<div class="empty">Searching documents...</div>';
 
         const streamingText = document.getElementById("streamingText");
         const streamingCursor = document.getElementById("streamingCursor");
@@ -945,7 +1393,7 @@
               const errData = await response.json();
               if (errData && errData.error) errorMsg = errData.error;
             } catch (_) {}
-            answer.textContent = errorMsg;
+            answer.innerHTML = `<div class="empty" style="color: #b91c1c;">${escapeHtml(errorMsg)}</div>`;
             sources.innerHTML = '<div class="empty">No sources.</div>';
             setGeneratingState(false);
             return;
@@ -1021,7 +1469,7 @@
 
           if (error.name === "AbortError") {
             const stoppedNotice = document.createElement("div");
-            stoppedNotice.style.color = "#6b7280";
+            stoppedNotice.style.color = "#64748b";
             stoppedNotice.style.fontStyle = "italic";
             stoppedNotice.style.marginTop = "8px";
             stoppedNotice.textContent = "[Generation stopped]";
@@ -1035,10 +1483,9 @@
               errNotice.textContent = "Request failed. Please try again.";
               answerBody.appendChild(errNotice);
             } else {
-              answer.textContent = "Request failed. Please try again.";
+              answer.innerHTML = '<div class="empty" style="color: #b91c1c;">Request failed. Please try again.</div>';
             }
-            sources.innerHTML =
-              '<div class="empty">Could not load sources.</div>';
+            sources.innerHTML = '<div class="empty">Could not load sources.</div>';
           }
         } finally {
           setGeneratingState(false);
@@ -1061,8 +1508,7 @@
           container.innerHTML = "";
 
           if (!data.history || data.history.length === 0) {
-            container.innerHTML =
-              '<div class="empty">No search memory recorded yet.</div>';
+            container.innerHTML = '<div class="empty">No conversations yet.</div>';
             return;
           }
 
@@ -1082,11 +1528,12 @@
                 .map(
                   (s) => `
                     <div class="history-source-item">
-                      <strong>Source ${s.source_number}:</strong> ${
-                        escapeHtml(s.metadata?.file_name || s.metadata?.file_path || "Document")
-                      } (Chunk ${s.metadata?.chunk_index ?? "N/A"})
-                      <br>
-                      <em>${escapeHtml((s.text || "").substring(0, 150))}${(s.text || "").length > 150 ? "..." : ""}</em>
+                      <div class="history-source-title">
+                        <strong>Source ${s.source_number}:</strong> ${
+                          escapeHtml(s.metadata?.file_name || s.metadata?.file_path || "Document")
+                        } <span class="history-source-chunk">(Chunk ${s.metadata?.chunk_index ?? "N/A"})</span>
+                      </div>
+                      <div class="history-source-text">${escapeHtml((s.text || "").substring(0, 150))}${(s.text || "").length > 150 ? "..." : ""}</div>
                     </div>
                   `
                 )
@@ -1107,7 +1554,7 @@
                 <span class="history-query">Q: ${escapeHtml(item.query)}</span>
                 <span class="history-meta">
                   <span class="history-badge">${escapeHtml(fileName)}</span>
-                  <span>${escapeHtml(item.timestamp || "")}</span>
+                  <span class="history-time">${escapeHtml(item.timestamp || "")}</span>
                 </span>
               </div>
               <div class="history-answer">${formatMarkdown(item.answer || "")}</div>
@@ -1118,7 +1565,7 @@
           }
         } catch (error) {
           console.error("Failed to load chat history:", error);
-          container.textContent = "Could not load chat history.";
+          container.innerHTML = '<div class="empty">Could not load chat history.</div>';
         }
       }
 
