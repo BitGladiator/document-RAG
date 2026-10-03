@@ -67,5 +67,74 @@
         "text": "[4, 27, 28, 22]. End-to-end memory networks are based on a recurrent attention mechanism instead of sequence- aligned recurrence and have been shown to perform well on simple-language question answering and language modeling tasks [34]. To the best of our knowledge, however, the Transformer is the first transduction model relying entirely on self-attention to compute representations of its input and output without using sequence- aligned RNNs or convolution. In the following sections, we will describe the Transformer, motivate self-attention and discuss its advantages over models such as [17, 18] and [9]. 3 Model Architecture Most competitive neural sequence transduction models have an encoder-decoder structure [5, 2, 35]. Here, the encoder maps an input sequence of symbol representations (x1,...,x n) to a sequence of continuous representations z = (z1,...,z n). Given z, the decoder then generates an output sequence (y1,...,y m) of symbols one element at a time. At each step the model is auto-regressive [10], consuming the previously generated symbols as additional input when generating the next. 2"
       }
     ]
+  },
+  {
+    "id": "bbc29383-1108-433c-a635-e54565b6739f",
+    "timestamp": "2026-10-03 18:24:48",
+    "query": "What is self-attention?",
+    "answer": "Self\u2011attention is an attention mechanism in which each position of a sequence computes a weighted sum of representations of all positions (including itself). It does this by mapping a query vector and a set of key\u2011value pairs (the other positions) to an output vector, where the weights are derived from the similarity between the query and each key\u202f[Source\u202f4]. In a self\u2011attention layer every position can attend to every other position with only a constant number of sequential operations, enabling direct connections across the whole sequence\u202f[Source\u202f3].",
+    "file_path": null,
+    "sources": [
+      {
+        "source_number": 1,
+        "metadata": {
+          "file_path": "/workspace/data/documents/1706.03762v7.pdf",
+          "file_type": ".pdf",
+          "file_name": "1706.03762v7.pdf",
+          "page_number": 13,
+          "chunk_index": 20
+        },
+        "distance": 1.1108579635620117,
+        "text": "Attention Visualizations Input-Input Layer5 It is in this spirit that a majority of American governments have passed new laws since 2009 making the registration or voting process more difficult . It is in this spirit that a majority of American governments have passed new laws since 2009 making the registration or voting process more difficult . Figure 3: An example of the attention mechanism following long-distance dependencies in the encoder self-attention in layer 5 of 6. Many of the attention heads attend to a distant dependency of the verb \u2018making\u2019, completing the phrase \u2018making...more difficult\u2019. Attentions here shown only for the word \u2018making\u2019. Different colors represent different heads. Best viewed in color. 13"
+      },
+      {
+        "source_number": 2,
+        "metadata": {
+          "file_path": "/workspace/data/documents/1706.03762v7.pdf",
+          "file_name": "1706.03762v7.pdf",
+          "file_type": ".pdf",
+          "page_number": 2,
+          "chunk_index": 2
+        },
+        "distance": 1.2405943870544434,
+        "text": "[4, 27, 28, 22]. End-to-end memory networks are based on a recurrent attention mechanism instead of sequence- aligned recurrence and have been shown to perform well on simple-language question answering and language modeling tasks [34]. To the best of our knowledge, however, the Transformer is the first transduction model relying entirely on self-attention to compute representations of its input and output without using sequence- aligned RNNs or convolution. In the following sections, we will describe the Transformer, motivate self-attention and discuss its advantages over models such as [17, 18] and [9]. 3 Model Architecture Most competitive neural sequence transduction models have an encoder-decoder structure [5, 2, 35]. Here, the encoder maps an input sequence of symbol representations (x1,...,x n) to a sequence of continuous representations z = (z1,...,z n). Given z, the decoder then generates an output sequence (y1,...,y m) of symbols one element at a time. At each step the model is auto-regressive [10], consuming the previously generated symbols as additional input when generating the next. 2"
+      },
+      {
+        "source_number": 3,
+        "metadata": {
+          "chunk_index": 8,
+          "file_name": "1706.03762v7.pdf",
+          "file_type": ".pdf",
+          "file_path": "/workspace/data/documents/1706.03762v7.pdf",
+          "page_number": 6
+        },
+        "distance": 1.2779020071029663,
+        "text": "the easier it is to learn long-range dependencies [12]. Hence we also compare the maximum path length between any two input and output positions in networks composed of the different layer types. As noted in Table 1, a self-attention layer connects all positions with a constant number of sequentially executed operations, whereas a recurrent layer requires O(n) sequential operations. In terms of computational complexity, self-attention layers are faster than recurrent layers when the sequence 6"
+      },
+      {
+        "source_number": 4,
+        "metadata": {
+          "file_path": "/workspace/data/documents/1706.03762v7.pdf",
+          "page_number": 3,
+          "chunk_index": 3,
+          "file_name": "1706.03762v7.pdf",
+          "file_type": ".pdf"
+        },
+        "distance": 1.336823582649231,
+        "text": "Figure 1: The Transformer - model architecture. The Transformer follows this overall architecture using stacked self-attention and point-wise, fully connected layers for both the encoder and decoder, shown in the left and right halves of Figure 1, respectively. 3.1 Encoder and Decoder Stacks Encoder: The encoder is composed of a stack of N = 6 identical layers. Each layer has two sub-layers. The first is a multi-head self-attention mechanism, and the second is a simple, position- wise fully connected feed-forward network. We employ a residual connection [11] around each of the two sub-layers, followed by layer normalization [ 1]. That is, the output of each sub-layer is LayerNorm(x + Sublayer(x)), where Sublayer(x) is the function implemented by the sub-layer itself. To facilitate these residual connections, all sub-layers in the model, as well as the embedding layers, produce outputs of dimensiondmodel = 512. Decoder: The decoder is also composed of a stack ofN = 6 identical layers. In addition to the two sub-layers in each encoder layer, the decoder inserts a third sub-layer, which performs multi-head attention over the output of the encoder stack. Similar to the encoder, we employ residual connections around each of the sub-layers, followed by layer normalization. We also modify the self-attention sub-layer in the decoder stack to prevent positions from attending to subsequent positions. This masking, combined with fact that the output embeddings are offset by one position, ensures that the predictions for positioni can depend only on the known outputs at positions less thani. 3.2 Attention An attention function can be described as mapping a query and a set of key-value pairs to an output, where the query, keys, values, and output are all vectors. The output is computed as a weighted sum 3"
+      },
+      {
+        "source_number": 5,
+        "metadata": {
+          "chunk_index": 18,
+          "file_type": ".pdf",
+          "file_path": "/workspace/data/documents/1706.03762v7.pdf",
+          "file_name": "1706.03762v7.pdf",
+          "page_number": 12
+        },
+        "distance": 1.3553495407104492,
+        "text": "[25] Mitchell P Marcus, Mary Ann Marcinkiewicz, and Beatrice Santorini. Building a large annotated corpus of english: The penn treebank. Computational linguistics, 19(2):313\u2013330, 1993. [26] David McClosky, Eugene Charniak, and Mark Johnson. Effective self-training for parsing. In Proceedings of the Human Language Technology Conference of the NAACL, Main Conference , pages 152\u2013159. ACL, June 2006. [27] Ankur Parikh, Oscar T\u00e4ckstr\u00f6m, Dipanjan Das, and Jakob Uszkoreit. A decomposable attention model. In Empirical Methods in Natural Language Processing , 2016. [28] Romain Paulus, Caiming Xiong, and Richard Socher. A deep reinforced model for abstractive summarization. arXiv preprint arXiv:1705.04304, 2017. [29] Slav Petrov, Leon Barrett, Romain Thibaux, and Dan Klein. Learning accurate, compact, and interpretable tree annotation. In Proceedings of the 21st International Conference on Computational Linguistics and 44th Annual Meeting of the ACL , pages 433\u2013440. ACL, July 2006. [30] Ofir Press and Lior Wolf. Using the output embedding to improve language models. arXiv preprint arXiv:1608.05859, 2016. [31] Rico Sennrich, Barry Haddow, and Alexandra Birch. Neural machine translation of rare words with subword units. arXiv preprint arXiv:1508.07909, 2015. [32] Noam Shazeer, Azalia Mirhoseini, Krzysztof Maziarz, Andy Davis, Quoc Le, Geoffrey Hinton, and Jeff Dean. Outrageously large neural networks: The sparsely-gated mixture-of-experts layer. arXiv preprint arXiv:1701.06538, 2017. [33] Nitish Srivastava, Geoffrey E Hinton, Alex Krizhevsky, Ilya Sutskever, and Ruslan Salakhutdi- nov. Dropout: a simple way to prevent neural networks from overfitting. Journal of Machine Learning Research, 15(1):1929\u20131958, 2014. [34] Sainbayar Sukhbaatar, Arthur Szlam, Jason Weston, and Rob Fergus. End-to-end memory networks. In C. Cortes, N. D. Lawrence, D. Lee, M. Sugiyama, and R. Garnett, editors, Advances in Neural Information Processing Systems 28 , pages 2440\u20132448. Curran Associates, Inc., 2015. [35] Ilya Sutskever, Oriol Vinyals, and Quoc VV Le. Sequence to sequence learning with neural networks. In Advances in Neural Information Processing Systems , pages 3104\u20133112, 2014. [36] Christian Szegedy, Vincent Vanhoucke, Sergey Ioffe, Jonathon Shlens, and Zbigniew Wojna. Rethinking the inception architecture for computer vision. CoRR, abs/1512.00567, 2015. [37] Vinyals & Kaiser, Koo, Petrov, Sutskever, and Hinton. Grammar as a foreign language. In Advances in Neural Information Processing Systems , 2015. [38] Yonghui Wu, Mike Schuster, Zhifeng Chen, Quoc V Le, Mohammad Norouzi, Wolfgang Macherey, Maxim Krikun, Yuan Cao, Qin Gao, Klaus Macherey, et al. Google\u2019s neural machine translation system: Bridging the gap between human and machine translation. arXiv preprint arXiv:1609.08144, 2016. [39] Jie Zhou, Ying Cao, Xuguang Wang, Peng Li, and Wei Xu. Deep recurrent models with fast-forward connections for neural machine translation. CoRR, abs/1606.04199, 2016. [40] Muhua Zhu, Yue Zhang, Wenliang Chen, Min Zhang, and Jingbo Zhu. Fast and accurate shift-reduce constituent parsing. In Proceedings of the 51st Annual Meeting of the ACL (V olume 1: Long Papers), pages 434\u2013443. ACL, August 2013. 12"
+      }
+    ]
   }
 ]

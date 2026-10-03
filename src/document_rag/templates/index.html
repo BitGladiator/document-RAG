@@ -7,6 +7,8 @@
     <title>Document RAG</title>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
       if (window.pdfjsLib) {
@@ -1529,6 +1531,10 @@
         const sources = document.getElementById("sources");
         sources.innerHTML = "";
 
+        if (sourcesList && sourcesList.length) {
+          currentSources = sourcesList;
+        }
+
         if (!sourcesList || sourcesList.length === 0) {
           sources.innerHTML = '<div class="empty">No relevant sources found.</div>';
           return;
@@ -1538,6 +1544,7 @@
           const div = document.createElement("div");
           div.className = "source";
           div.id = `source-${source.source_number}`;
+          div._sourceData = source;
           const metadata = source.metadata || {};
 
           const fileName = metadata.file_name || metadata.file_path || "Unknown file";
@@ -1727,29 +1734,89 @@
 
       function formatMarkdown(text) {
         if (!text) return "";
+
+        // 1. Protect and extract LaTeX math blocks before markdown parsing
+        const mathBlocks = [];
+
+        // Display math: \[ ... \] or $$ ... $$
+        let processedText = text.replace(/\\\[([\s\S]*?)\\\]|\$\$([\s\S]*?)\$\$/g, (match, p1, p2) => {
+          const math = (p1 || p2).trim();
+          const placeholder = `___MATH_DISP_${mathBlocks.length}___`;
+          mathBlocks.push({ placeholder, math, display: true });
+          return `\n\n${placeholder}\n\n`;
+        });
+
+        // Inline math: \( ... \)
+        processedText = processedText.replace(/\\\(([\s\S]*?)\\\)/g, (match, p1) => {
+          const math = p1.trim();
+          const placeholder = `___MATH_INL_${mathBlocks.length}___`;
+          mathBlocks.push({ placeholder, math, display: false });
+          return placeholder;
+        });
+
+        // 2. Parse Markdown
         let html = "";
         if (typeof marked !== "undefined") {
           try {
             if (typeof marked.parse === "function") {
-              html = marked.parse(text, { breaks: true, gfm: true });
+              html = marked.parse(processedText, { breaks: true, gfm: true });
             } else if (typeof marked === "function") {
-              html = marked(text);
+              html = marked(processedText);
             } else {
-              html = fallbackMarkdown(text);
+              html = fallbackMarkdown(processedText);
             }
           } catch (e) {
-            html = fallbackMarkdown(text);
+            html = fallbackMarkdown(processedText);
           }
         } else {
-          html = fallbackMarkdown(text);
+          html = fallbackMarkdown(processedText);
         }
 
+        // 3. Wrap tables for responsive horizontal scrolling
         if (!html.includes('class="table-container"')) {
           html = html.replace(/<table(\s*|>)/g, '<div class="table-container"><table$1');
           html = html.replace(/<\/table>/g, "</table></div>");
         }
 
-        html = html.replace(/\[Source[\s\u00a0\u202f]+(\d+)\]/gi, '<button type="button" class="citation" data-source="$1">Source $1</button>');
+        // 4. Restore math expressions with KaTeX or clean fallback
+        mathBlocks.forEach(({ placeholder, math, display }) => {
+          let mathHtml = "";
+          if (typeof katex !== "undefined" && typeof katex.renderToString === "function") {
+            try {
+              mathHtml = katex.renderToString(math, {
+                displayMode: display,
+                throwOnError: false
+              });
+            } catch (err) {
+              mathHtml = display
+                ? `<div class="katex-fallback" style="text-align: center; margin: 12px 0; font-family: monospace;">\\[${escapeHtml(math)}\\]</div>`
+                : `<span class="katex-fallback" style="font-family: monospace;">\\(${escapeHtml(math)}\\)</span>`;
+            }
+          } else {
+            mathHtml = display
+              ? `<div class="katex-fallback" style="text-align: center; margin: 12px 0; font-family: monospace;">\\[${escapeHtml(math)}\\]</div>`
+              : `<span class="katex-fallback" style="font-family: monospace;">\\(${escapeHtml(math)}\\)</span>`;
+          }
+
+          if (display) {
+            const pWrapped = new RegExp(`<p>\\s*${placeholder}\\s*<\\/p>`, "g");
+            if (pWrapped.test(html)) {
+              html = html.replace(pWrapped, mathHtml);
+            } else {
+              html = html.replace(placeholder, mathHtml);
+            }
+          } else {
+            html = html.replace(placeholder, mathHtml);
+          }
+        });
+
+        // 5. Replace citations with clickable buttons (handles [Source 1], 【Source 1】, (Source 1), [Sources 1, 2], etc.)
+        html = html.replace(/(?:\[|【|\()([^[\]【】()]*?Source[^[\]【】()]*?)(?:\]|】|\))/gi, (match, inner) => {
+          const numbers = inner.match(/\d+/g);
+          if (!numbers || numbers.length === 0) return match;
+          return numbers.map(num => `<button type="button" class="citation" data-source="${num}">Source ${num}</button>`).join(" ");
+        });
+
         return html;
       }
 
@@ -2178,10 +2245,25 @@
         if (historyParent) {
           const historyId = historyParent.getAttribute("data-history-id");
           const hSources = historySourcesMap[historyId] || [];
-          source = hSources.find(s => s.source_number === sourceId);
+          source = hSources.find(s => Number(s.source_number) === Number(sourceId));
         }
         if (!source && currentSources && currentSources.length) {
-          source = currentSources.find(s => s.source_number === sourceId);
+          source = currentSources.find(s => Number(s.source_number) === Number(sourceId));
+        }
+        if (!source) {
+          const domSource = document.getElementById(`source-${sourceId}`);
+          if (domSource && domSource._sourceData) {
+            source = domSource._sourceData;
+          }
+        }
+        if (!source) {
+          for (const hid in historySourcesMap) {
+            const found = historySourcesMap[hid].find(s => Number(s.source_number) === Number(sourceId));
+            if (found) {
+              source = found;
+              break;
+            }
+          }
         }
 
         // 2. Check if source belongs to a PDF
