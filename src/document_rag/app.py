@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from flask import Flask, jsonify, request, render_template, Response, stream_with_context
+from flask import Flask, jsonify, request, render_template, Response, stream_with_context, send_from_directory
 from .rag import ask_rag, ask_rag_stream
 from .memory import (
     add_interaction,
@@ -16,9 +16,9 @@ from .indexing import (
 
 app = Flask(__name__)
 
-DOCUMENTS_DIR = Path(
-    "/workspace/data/documents"
-)
+WORKSPACE_DOCS = Path("/workspace/data/documents")
+LOCAL_DOCS = Path(__file__).resolve().parents[2] / "data" / "documents"
+DOCUMENTS_DIR = WORKSPACE_DOCS if WORKSPACE_DOCS.exists() else LOCAL_DOCS
 
 DOCUMENTS_DIR.mkdir(
     parents=True,
@@ -170,6 +170,42 @@ def documents():
     return jsonify({
         "documents": list_documents()
     })
+
+
+@app.get("/documents/<path:file_name>")
+def get_document(file_name):
+
+    safe_name = Path(file_name).name
+    if not safe_name or safe_name != file_name or ".." in file_name or "/" in file_name or "\\" in file_name:
+        return jsonify({
+            "error": "Invalid document filename"
+        }), 400
+
+    target_path = (DOCUMENTS_DIR / safe_name).resolve()
+    try:
+        if not target_path.is_relative_to(DOCUMENTS_DIR.resolve()):
+            return jsonify({
+                "error": "Access denied"
+            }), 403
+    except AttributeError:
+        if not str(target_path).startswith(str(DOCUMENTS_DIR.resolve())):
+            return jsonify({
+                "error": "Access denied"
+            }), 403
+
+    if not target_path.is_file():
+        return jsonify({
+            "error": "Document not found"
+        }), 404
+
+    mimetype = "application/pdf" if target_path.suffix.lower() == ".pdf" else None
+
+    return send_from_directory(
+        DOCUMENTS_DIR,
+        safe_name,
+        mimetype=mimetype,
+        as_attachment=False
+    )
 
 
 @app.delete("/documents/<file_name>")
