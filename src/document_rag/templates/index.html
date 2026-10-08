@@ -485,6 +485,201 @@
         margin-top: 4px;
       }
 
+      .verify-action-container {
+        margin-top: 16px;
+        padding-top: 14px;
+        border-top: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .btn-verify {
+        font-size: 13px;
+        font-weight: 500;
+        padding: 6px 14px;
+        border-radius: 6px;
+        transition: all 0.15s ease;
+      }
+
+      .btn-verify:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+      }
+
+      .verify-error-notice {
+        font-size: 12.5px;
+        color: #b91c1c;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 6px;
+        padding: 6px 10px;
+      }
+
+      .evidence-panel {
+        margin-top: 20px;
+        padding-top: 18px;
+        border-top: 1px solid #e2e8f0;
+      }
+
+      .evidence-panel-header {
+        margin-bottom: 14px;
+      }
+
+      .evidence-panel-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #0f172a;
+        margin: 0;
+      }
+
+      .evidence-overall-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 12px 16px;
+        margin-bottom: 16px;
+      }
+
+      .evidence-overall-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 6px;
+      }
+
+      .evidence-overall-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .evidence-summary-text {
+        font-size: 13.5px;
+        color: #334155;
+        line-height: 1.5;
+      }
+
+      .evidence-status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 4px;
+        line-height: 1.4;
+      }
+
+      .status-pill-strong,
+      .status-pill-supported {
+        background: #f0fdf4;
+        color: #15803d;
+        border: 1px solid #bbf7d0;
+      }
+
+      .status-pill-mixed,
+      .status-pill-partially {
+        background: #fffbeb;
+        color: #b45309;
+        border: 1px solid #fde68a;
+      }
+
+      .status-pill-weak,
+      .status-pill-unsupported {
+        background: #fef2f2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+      }
+
+      .evidence-claims-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .evidence-claim-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 14px 16px;
+        transition: border-color 0.15s ease;
+      }
+
+      .evidence-claim-card.status-supported {
+        border-left: 3px solid #16a34a;
+      }
+
+      .evidence-claim-card.status-partially {
+        border-left: 3px solid #d97706;
+      }
+
+      .evidence-claim-card.status-unsupported {
+        border-left: 3px solid #dc2626;
+      }
+
+      .evidence-claim-header {
+        margin-bottom: 8px;
+      }
+
+      .evidence-claim-text {
+        font-size: 14px;
+        font-weight: 500;
+        color: #0f172a;
+        line-height: 1.55;
+        margin-bottom: 10px;
+      }
+
+      .evidence-claim-sources {
+        font-size: 12.5px;
+        color: #475569;
+        margin-bottom: 6px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .evidence-sources-label {
+        font-weight: 600;
+        color: #64748b;
+        font-size: 12px;
+      }
+
+      .evidence-source-entry {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+      }
+
+      .evidence-source-meta {
+        color: #64748b;
+      }
+
+      .evidence-no-source {
+        font-size: 12.5px;
+        color: #64748b;
+        font-style: italic;
+        margin-bottom: 6px;
+      }
+
+      .evidence-claim-explanation {
+        font-size: 13px;
+        line-height: 1.5;
+        color: #475569;
+        background: #f8fafc;
+        border: 1px solid #f1f5f9;
+        border-radius: 4px;
+        padding: 8px 10px;
+        margin-top: 8px;
+      }
+
       .citation {
         display: inline-flex;
         align-items: center;
@@ -1304,6 +1499,34 @@
             </div>
             <div id="answer" class="answer-content">
               <div class="empty">Ask a question to see an answer here.</div>
+            </div>
+
+            <div id="verifyActionContainer" class="verify-action-container" style="display: none;">
+              <button
+                type="button"
+                id="verifyBtn"
+                class="btn btn-secondary btn-verify"
+                onclick="verifyAnswer()"
+              >
+                Verify answer
+              </button>
+              <div id="verifyErrorNotice" class="verify-error-notice" style="display: none;"></div>
+            </div>
+
+            <div id="evidencePanel" class="evidence-panel" style="display: none;">
+              <div class="evidence-panel-header">
+                <h3 class="evidence-panel-title">Evidence</h3>
+              </div>
+
+              <div class="evidence-overall-box" id="evidenceOverallBox">
+                <div class="evidence-overall-header">
+                  <span class="evidence-overall-label">Overall evidence</span>
+                  <span id="evidenceOverallBadge" class="evidence-status-pill"></span>
+                </div>
+                <div id="evidenceSummary" class="evidence-summary-text"></div>
+              </div>
+
+              <div id="evidenceClaimsList" class="evidence-claims-list"></div>
             </div>
           </section>
 
@@ -2334,6 +2557,7 @@
         }
 
         setGeneratingState(true);
+        resetVerificationState();
 
         answer.innerHTML = `
           <div class="current-question">Q: ${escapeHtml(question)}</div>
@@ -2428,6 +2652,7 @@
                 if (streamingCursor) streamingCursor.remove();
                 renderAnswerWithCitations(finalAnswer, answerBody);
                 loadHistory();
+                onAnswerFinishedSuccessfully(question, finalAnswer);
               } else if (eventType === "error") {
                 if (streamingCursor) streamingCursor.remove();
                 const errDiv = document.createElement("div");
@@ -2469,6 +2694,233 @@
         } finally {
           setGeneratingState(false);
         }
+      }
+
+      // Evidence Verification (Grounding) State & Handlers
+      let lastCompletedQuery = "";
+      let lastCompletedAnswer = "";
+      let isVerifying = false;
+
+      function resetVerificationState() {
+        lastCompletedQuery = "";
+        lastCompletedAnswer = "";
+        isVerifying = false;
+        const actionContainer = document.getElementById("verifyActionContainer");
+        const evidencePanel = document.getElementById("evidencePanel");
+        const errorNotice = document.getElementById("verifyErrorNotice");
+        const verifyBtn = document.getElementById("verifyBtn");
+
+        if (actionContainer) actionContainer.style.display = "none";
+        if (evidencePanel) evidencePanel.style.display = "none";
+        if (errorNotice) {
+          errorNotice.style.display = "none";
+          errorNotice.textContent = "";
+        }
+        if (verifyBtn) {
+          verifyBtn.disabled = false;
+          verifyBtn.textContent = "Verify answer";
+        }
+      }
+
+      function onAnswerFinishedSuccessfully(query, answer) {
+        lastCompletedQuery = query;
+        lastCompletedAnswer = answer;
+
+        const actionContainer = document.getElementById("verifyActionContainer");
+        const verifyBtn = document.getElementById("verifyBtn");
+        const errorNotice = document.getElementById("verifyErrorNotice");
+
+        // The button should only appear when answer exists, completed successfully, and sources exist
+        if (answer && answer.trim() && currentSources && currentSources.length > 0) {
+          if (actionContainer) actionContainer.style.display = "flex";
+          if (verifyBtn) {
+            verifyBtn.textContent = "Verify answer";
+            verifyBtn.disabled = false;
+          }
+          if (errorNotice) {
+            errorNotice.style.display = "none";
+            errorNotice.textContent = "";
+          }
+        } else {
+          if (actionContainer) actionContainer.style.display = "none";
+        }
+      }
+
+      async function verifyAnswer() {
+        if (isVerifying) return;
+        if (!lastCompletedAnswer || !currentSources || !currentSources.length) return;
+
+        const verifyBtn = document.getElementById("verifyBtn");
+        const errorNotice = document.getElementById("verifyErrorNotice");
+        const evidencePanel = document.getElementById("evidencePanel");
+
+        isVerifying = true;
+        if (verifyBtn) {
+          verifyBtn.disabled = true;
+          verifyBtn.textContent = "Verifying evidence...";
+        }
+        if (errorNotice) {
+          errorNotice.style.display = "none";
+          errorNotice.textContent = "";
+        }
+
+        try {
+          const response = await fetch("/verify", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              question: lastCompletedQuery,
+              answer: lastCompletedAnswer,
+              sources: currentSources,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || "Unable to verify this answer.");
+          }
+
+          renderVerificationResult(data);
+
+          if (verifyBtn) {
+            verifyBtn.disabled = false;
+            verifyBtn.textContent = "Re-check answer";
+          }
+        } catch (error) {
+          console.error("Verification error:", error);
+          if (errorNotice) {
+            errorNotice.textContent = "Unable to verify this answer. Please try again.";
+            errorNotice.style.display = "block";
+          }
+          if (verifyBtn) {
+            verifyBtn.disabled = false;
+            verifyBtn.textContent = "Verify answer";
+          }
+        } finally {
+          isVerifying = false;
+        }
+      }
+
+      function renderVerificationResult(data) {
+        const panel = document.getElementById("evidencePanel");
+        const overallBadge = document.getElementById("evidenceOverallBadge");
+        const summaryEl = document.getElementById("evidenceSummary");
+        const claimsList = document.getElementById("evidenceClaimsList");
+
+        if (!panel || !overallBadge || !summaryEl || !claimsList) return;
+
+        panel.style.display = "block";
+
+        // 1. Overall assessment
+        const overall = (data.overall || "mixed").toLowerCase();
+        let overallLabel = "Mixed evidence";
+        let overallClass = "status-pill-mixed";
+
+        if (overall === "strong") {
+          overallLabel = "Strong evidence";
+          overallClass = "status-pill-strong";
+        } else if (overall === "weak") {
+          overallLabel = "Weak evidence";
+          overallClass = "status-pill-weak";
+        }
+
+        overallBadge.className = `evidence-status-pill ${overallClass}`;
+        overallBadge.textContent = overallLabel;
+        summaryEl.textContent = data.summary || "Evidence analysis completed.";
+
+        // 2. Claim-level verification
+        claimsList.innerHTML = "";
+
+        const claims = data.claims || [];
+        if (!claims.length) {
+          claimsList.innerHTML = '<div class="empty">No specific factual claims were identified in this answer.</div>';
+          return;
+        }
+
+        for (const claimObj of claims) {
+          const claimCard = document.createElement("div");
+          const rawStatus = (claimObj.status || "UNSUPPORTED").toUpperCase();
+
+          let statusLabel = "Unsupported";
+          let statusIcon = "✕";
+          let pillClass = "status-pill-unsupported";
+          let cardClass = "status-unsupported";
+
+          if (rawStatus === "SUPPORTED") {
+            statusLabel = "Supported";
+            statusIcon = "✓";
+            pillClass = "status-pill-supported";
+            cardClass = "status-supported";
+          } else if (rawStatus === "PARTIALLY_SUPPORTED") {
+            statusLabel = "Partially supported";
+            statusIcon = "◐";
+            pillClass = "status-pill-partially";
+            cardClass = "status-partially";
+          }
+
+          claimCard.className = `evidence-claim-card ${cardClass}`;
+
+          // Validate source IDs strictly against currentSources
+          const validSourceEntries = [];
+          if (Array.isArray(claimObj.source_ids)) {
+            for (const sid of claimObj.source_ids) {
+              const found = currentSources.find(s => Number(s.source_number) === Number(sid));
+              if (found && !validSourceEntries.some(x => Number(x.source_number) === Number(found.source_number))) {
+                validSourceEntries.push(found);
+              }
+            }
+          }
+
+          let sourcesHtml = "";
+          if (validSourceEntries.length > 0) {
+            const items = validSourceEntries.map(s => {
+              const meta = s.metadata || {};
+              const fileName = meta.file_name || (meta.file_path ? meta.file_path.split("/").pop() : "Document");
+              const pageNum = meta.page_number;
+              const isPdf = (meta.file_type || "").toLowerCase() === ".pdf" || (fileName && fileName.toLowerCase().endsWith(".pdf"));
+
+              return `
+                <span class="evidence-source-entry">
+                  <button type="button" class="citation" data-source="${s.source_number}">Source ${s.source_number}</button>
+                  <span class="evidence-source-meta">· ${escapeHtml(fileName)}${pageNum ? ` · Page ${pageNum}` : ""}</span>
+                  ${isPdf ? `<button type="button" class="btn-source-view" onclick="openPdfForSource(${s.source_number})">Open source</button>` : ""}
+                </span>
+              `;
+            }).join(" ");
+
+            sourcesHtml = `
+              <div class="evidence-claim-sources">
+                <span class="evidence-sources-label">Evidence:</span>
+                ${items}
+              </div>
+            `;
+          } else {
+            sourcesHtml = `
+              <div class="evidence-no-source">No supporting evidence was found in the retrieved documents.</div>
+            `;
+          }
+
+          let explanationHtml = "";
+          if (claimObj.explanation && claimObj.explanation.trim()) {
+            explanationHtml = `<div class="evidence-claim-explanation">${escapeHtml(claimObj.explanation.trim())}</div>`;
+          }
+
+          claimCard.innerHTML = `
+            <div class="evidence-claim-header">
+              <span class="evidence-status-pill ${pillClass}">${statusIcon} ${statusLabel}</span>
+            </div>
+            <div class="evidence-claim-text">"${escapeHtml(claimObj.claim)}"</div>
+            ${sourcesHtml}
+            ${explanationHtml}
+          `;
+
+          claimsList.appendChild(claimCard);
+        }
+
+        panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }
 
       document.getElementById("question").addEventListener("keydown", (e) => {

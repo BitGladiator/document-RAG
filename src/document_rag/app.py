@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 from flask import Flask, jsonify, request, render_template, Response, stream_with_context, send_from_directory
-from .rag import ask_rag, ask_rag_stream
+from .rag import ask_rag, ask_rag_stream, verify_answer
 from .memory import (
     add_interaction,
     get_history,
@@ -97,6 +97,44 @@ def ask():
             "Connection": "keep-alive"
         }
     )
+
+
+@app.post("/verify")
+def verify():
+
+    data = request.get_json()
+
+    if not data:
+        return jsonify({
+            "error": "Missing request payload"
+        }), 400
+
+    query = str(data.get("question") or data.get("query") or "").strip()
+    answer = str(data.get("answer") or "").strip()
+    sources = data.get("sources")
+
+    if not answer:
+        return jsonify({
+            "error": "Missing 'answer' to verify"
+        }), 400
+
+    if not isinstance(sources, list) or len(sources) == 0:
+        return jsonify({
+            "error": "Missing 'sources' for verification"
+        }), 400
+
+    try:
+        result = verify_answer(
+            query=query,
+            answer=answer,
+            sources=sources
+        )
+        return jsonify(result)
+    except Exception as e:
+        app.logger.error("Answer verification failed: %s", e)
+        return jsonify({
+            "error": "Unable to verify this answer. Please try again."
+        }), 500
 
 
 @app.get("/history")
