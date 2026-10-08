@@ -680,6 +680,217 @@
         margin-top: 8px;
       }
 
+      /* Document Search Styles */
+      .search-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .search-input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 6px 8px 6px 14px;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      .search-input-wrapper:focus-within {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      }
+
+      .search-input {
+        flex: 1;
+        border: none;
+        outline: none;
+        font-size: 15px;
+        color: #0f172a;
+        background: transparent;
+        padding: 6px 0;
+      }
+
+      .search-input::placeholder {
+        color: #94a3b8;
+      }
+
+      .search-status-notice {
+        font-size: 12.5px;
+        margin-top: 10px;
+        border-radius: 6px;
+        padding: 8px 12px;
+        line-height: 1.4;
+      }
+
+      .search-suggestions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+        font-size: 12px;
+        color: #64748b;
+      }
+
+      .search-suggestions-label {
+        font-weight: 500;
+      }
+
+      .search-chip {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        border-radius: 9999px;
+        padding: 2px 10px;
+        font-size: 12px;
+        color: #334155;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+
+      .search-chip:hover {
+        background: #e2e8f0;
+        color: #0f172a;
+        border-color: #cbd5e1;
+      }
+
+      .search-results-section {
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid #f1f5f9;
+      }
+
+      .search-results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .search-results-count {
+        font-size: 13px;
+        font-weight: 600;
+        color: #334155;
+      }
+
+      .btn-ghost-sm {
+        background: transparent;
+        border: none;
+        color: #64748b;
+        font-size: 12px;
+        cursor: pointer;
+        padding: 3px 8px;
+        border-radius: 4px;
+        transition: all 0.15s ease;
+      }
+
+      .btn-ghost-sm:hover {
+        color: #0f172a;
+        background: #f1f5f9;
+      }
+
+      .search-results-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .search-result-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 12px 16px;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      .search-result-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+      }
+
+      .search-result-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+        flex-wrap: wrap;
+      }
+
+      .search-result-file {
+        font-size: 13.5px;
+        font-weight: 600;
+        color: #0f172a;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .search-result-page-badge {
+        font-size: 11px;
+        font-weight: 600;
+        color: #1d4ed8;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        padding: 1px 6px;
+        border-radius: 4px;
+      }
+
+      .search-result-score {
+        font-size: 11px;
+        color: #64748b;
+        font-weight: 500;
+      }
+
+      .search-result-snippet {
+        font-size: 13px;
+        line-height: 1.55;
+        color: #334155;
+        margin-bottom: 10px;
+        background: #f8fafc;
+        border: 1px solid #f1f5f9;
+        border-radius: 4px;
+        padding: 8px 10px;
+      }
+
+      mark.search-mark {
+        background-color: #fef08a;
+        color: inherit;
+        padding: 0 2px;
+        border-radius: 2px;
+        font-weight: 500;
+      }
+
+      .search-result-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .btn-sm {
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      .search-result-full-text {
+        display: none;
+        font-size: 12.5px;
+        line-height: 1.55;
+        color: #334155;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        padding: 10px 12px;
+        margin-top: 10px;
+        white-space: pre-wrap;
+      }
+
       .citation {
         display: inline-flex;
         align-items: center;
@@ -1415,17 +1626,20 @@
           max-height: 650px;
         }
 
+        .search-header,
         .ask-header {
           flex-direction: column;
           align-items: flex-start;
         }
 
+        .search-input-wrapper,
         .question-input-wrapper {
           flex-direction: column;
           align-items: stretch;
           padding: 10px;
         }
 
+        .search-input,
         .question-input {
           padding: 4px 0;
         }
@@ -1465,6 +1679,46 @@
         </aside>
 
         <main class="main-content">
+          <section class="panel search-panel">
+            <div class="search-header">
+              <h2 class="panel-title">Search documents</h2>
+              <div class="scope-selector">
+                <label for="searchDocumentSelect" class="scope-label">Search in:</label>
+                <select id="searchDocumentSelect" class="form-select">
+                  <option value="">All documents</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="search-input-wrapper">
+              <input
+                type="text"
+                id="searchQuery"
+                class="search-input"
+                placeholder="Search your documents..."
+                autocomplete="off"
+              />
+              <button id="searchBtn" class="btn btn-primary" onclick="searchDocuments()">Search</button>
+            </div>
+
+            <div id="searchStatusNotice" class="search-status-notice status" style="display: none;"></div>
+
+            <div id="searchSuggestions" class="search-suggestions">
+              <span class="search-suggestions-label">Try:</span>
+              <button type="button" class="search-chip" onclick="applySearchSuggestion('attention')">attention</button>
+              <button type="button" class="search-chip" onclick="applySearchSuggestion('transformer architecture')">transformer architecture</button>
+              <button type="button" class="search-chip" onclick="applySearchSuggestion('limitations')">limitations</button>
+            </div>
+
+            <div id="searchResultsSection" class="search-results-section" style="display: none;">
+              <div class="search-results-header">
+                <span class="search-results-count" id="searchResultsCount">0 results</span>
+                <button type="button" class="btn-ghost-sm" onclick="clearSearchResults()">Clear search</button>
+              </div>
+              <div id="searchResultsList" class="search-results-list"></div>
+            </div>
+          </section>
+
           <section class="panel ask-panel">
             <div class="ask-header">
               <h2 class="panel-title">Ask your documents</h2>
@@ -1725,18 +1979,34 @@
 
       async function loadDocumentSelector() {
         const select = document.getElementById("documentSelect");
+        const searchSelect = document.getElementById("searchDocumentSelect");
 
         try {
           const response = await fetch("/documents");
           const data = await response.json();
 
-          select.innerHTML = '<option value="">All documents</option>';
+          if (select) {
+            const currentVal = select.value;
+            select.innerHTML = '<option value="">All documents</option>';
+            for (const doc of data.documents || []) {
+              const option = document.createElement("option");
+              option.value = doc.file_path;
+              option.textContent = doc.file_name;
+              select.appendChild(option);
+            }
+            if (currentVal) select.value = currentVal;
+          }
 
-          for (const doc of data.documents || []) {
-            const option = document.createElement("option");
-            option.value = doc.file_path;
-            option.textContent = doc.file_name;
-            select.appendChild(option);
+          if (searchSelect) {
+            const currentSearchVal = searchSelect.value;
+            searchSelect.innerHTML = '<option value="">All documents</option>';
+            for (const doc of data.documents || []) {
+              const option = document.createElement("option");
+              option.value = doc.file_path;
+              option.textContent = doc.file_name;
+              searchSelect.appendChild(option);
+            }
+            if (currentSearchVal) searchSelect.value = currentSearchVal;
           }
         } catch (error) {
           console.error("Could not load document selector:", error);
@@ -3028,6 +3298,264 @@
           console.error("Clear memory error:", error);
           alert("Failed to clear memory.");
         }
+      }
+
+      // Document Search State & Handlers
+      let isSearching = false;
+      let lastSearchResults = [];
+
+      function applySearchSuggestion(term) {
+        const input = document.getElementById("searchQuery");
+        if (input) {
+          input.value = term;
+          searchDocuments();
+        }
+      }
+
+      function clearSearchResults() {
+        const section = document.getElementById("searchResultsSection");
+        const list = document.getElementById("searchResultsList");
+        const count = document.getElementById("searchResultsCount");
+        const notice = document.getElementById("searchStatusNotice");
+        const suggestions = document.getElementById("searchSuggestions");
+        const input = document.getElementById("searchQuery");
+
+        if (input) input.value = "";
+        if (section) section.style.display = "none";
+        if (list) list.innerHTML = "";
+        if (count) count.textContent = "";
+        if (notice) {
+          notice.style.display = "none";
+          notice.textContent = "";
+        }
+        if (suggestions) suggestions.style.display = "flex";
+      }
+
+      async function searchDocuments() {
+        if (isSearching) return;
+
+        const input = document.getElementById("searchQuery");
+        const scopeSelect = document.getElementById("searchDocumentSelect");
+        const query = (input ? input.value : "").trim();
+        const selectedFile = scopeSelect ? scopeSelect.value : "";
+
+        const searchBtn = document.getElementById("searchBtn");
+        const statusNotice = document.getElementById("searchStatusNotice");
+        const resultsSection = document.getElementById("searchResultsSection");
+        const suggestions = document.getElementById("searchSuggestions");
+
+        if (!query) {
+          if (statusNotice) {
+            statusNotice.className = "search-status-notice status status-error visible";
+            statusNotice.textContent = "Please enter a search query.";
+            statusNotice.style.display = "block";
+          }
+          return;
+        }
+
+        isSearching = true;
+        if (searchBtn) {
+          searchBtn.disabled = true;
+          searchBtn.textContent = "Searching...";
+        }
+        if (statusNotice) {
+          statusNotice.className = "search-status-notice status status-loading visible";
+          statusNotice.textContent = "Searching documents...";
+          statusNotice.style.display = "block";
+        }
+
+        try {
+          const response = await fetch("/search", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              query: query,
+              file_path: selectedFile || null,
+              limit: 10,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || "Unable to search documents.");
+          }
+
+          if (statusNotice) {
+            statusNotice.style.display = "none";
+            statusNotice.textContent = "";
+          }
+
+          renderSearchResults(query, data.results || []);
+        } catch (error) {
+          console.error("Search error:", error);
+          if (statusNotice) {
+            statusNotice.className = "search-status-notice status status-error visible";
+            statusNotice.textContent = "Unable to search documents. Please try again.";
+            statusNotice.style.display = "block";
+          }
+          if (resultsSection) resultsSection.style.display = "none";
+        } finally {
+          isSearching = false;
+          if (searchBtn) {
+            searchBtn.disabled = false;
+            searchBtn.textContent = "Search";
+          }
+        }
+      }
+
+      function renderSearchResults(query, results) {
+        lastSearchResults = results || [];
+
+        const resultsSection = document.getElementById("searchResultsSection");
+        const resultsCount = document.getElementById("searchResultsCount");
+        const resultsList = document.getElementById("searchResultsList");
+        const suggestions = document.getElementById("searchSuggestions");
+
+        if (suggestions) suggestions.style.display = "none";
+        if (resultsSection) resultsSection.style.display = "block";
+        if (!resultsList) return;
+
+        resultsList.innerHTML = "";
+
+        if (!results || results.length === 0) {
+          if (resultsCount) resultsCount.textContent = `0 results for "${query}"`;
+          resultsList.innerHTML = `
+            <div class="empty">
+              No matching passages found.
+              <span class="empty-sub">Try a different search term or check your document scope.</span>
+            </div>
+          `;
+          return;
+        }
+
+        const countText = `${results.length} result${results.length === 1 ? "" : "s"} for "${escapeHtml(query)}"`;
+        if (resultsCount) resultsCount.textContent = countText;
+
+        // Parse search terms for safe highlight
+        const rawTerms = query.toLowerCase().split(/\s+/).filter(t => t.length >= 2);
+        const escapedTerms = rawTerms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+        const termRegex = escapedTerms.length > 0 ? new RegExp(`(${escapedTerms.join("|")})`, "gi") : null;
+
+        results.forEach((item, idx) => {
+          const card = document.createElement("div");
+          card.className = "search-result-card";
+
+          const fileName = item.file_name || "Document";
+          const pageNum = item.page_number;
+          const isPdf = (item.file_type || "").toLowerCase() === ".pdf" || fileName.toLowerCase().endsWith(".pdf");
+
+          // Safely escape text first, then highlight matching terms with semantic <mark>
+          let safeSnippet = escapeHtml(item.snippet || item.text || "");
+          if (termRegex) {
+            safeSnippet = safeSnippet.replace(termRegex, '<mark class="search-mark">$1</mark>');
+          }
+
+          const scorePercent = item.score !== undefined && item.score !== null ? Math.round(item.score * 100) : null;
+
+          let openActionHtml = "";
+          if (isPdf) {
+            openActionHtml = `
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                title="Open in PDF document viewer"
+                onclick="openPdfSearchResult('${encodeURIComponent(fileName)}', ${pageNum !== null && pageNum !== undefined ? pageNum : "null"}, ${idx})"
+              >
+                Open page${pageNum ? ` ${pageNum}` : ""}
+              </button>
+            `;
+          } else {
+            openActionHtml = `
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                title="View full passage text"
+                onclick="toggleFullText(${idx})"
+              >
+                View passage
+              </button>
+            `;
+          }
+
+          card.innerHTML = `
+            <div class="search-result-top">
+              <div class="search-result-file">
+                <span>${escapeHtml(fileName)}</span>
+                ${pageNum ? `<span class="search-result-page-badge">Page ${pageNum}</span>` : ""}
+              </div>
+              ${scorePercent !== null ? `<span class="search-result-score">${scorePercent}% relevance</span>` : ""}
+            </div>
+            <div class="search-result-snippet">"${safeSnippet}"</div>
+            <div class="search-result-actions">
+              ${openActionHtml}
+              <button
+                type="button"
+                class="btn-ghost-sm"
+                title="Ask an AI question about this passage"
+                onclick="askFromSearchResult('${encodeURIComponent(fileName)}', '${encodeURIComponent(item.file_path || fileName)}', ${idx})"
+              >
+                Ask about this
+              </button>
+            </div>
+            <div id="searchFullText-${idx}" class="search-result-full-text">${escapeHtml(item.text || "")}</div>
+          `;
+
+          card._searchData = item;
+          resultsList.appendChild(card);
+        });
+      }
+
+      function openPdfSearchResult(encodedFileName, pageNum, idx) {
+        const fileName = decodeURIComponent(encodedFileName);
+        const card = document.querySelectorAll(".search-result-card")[idx];
+        const text = card && card._searchData ? card._searchData.text : "";
+        openPdfCitation(fileName, pageNum, text, null);
+      }
+
+      function toggleFullText(idx) {
+        const el = document.getElementById(`searchFullText-${idx}`);
+        if (el) {
+          el.style.display = el.style.display === "block" ? "none" : "block";
+        }
+      }
+
+      function askFromSearchResult(encodedFileName, encodedFilePath, idx) {
+        const fileName = decodeURIComponent(encodedFileName);
+        const filePath = decodeURIComponent(encodedFilePath);
+        const card = document.querySelectorAll(".search-result-card")[idx];
+        const snippet = card && card._searchData ? card._searchData.snippet : "";
+
+        const questionInput = document.getElementById("question");
+        const docSelect = document.getElementById("documentSelect");
+
+        if (docSelect) {
+          for (let i = 0; i < docSelect.options.length; i++) {
+            if (docSelect.options[i].value === filePath || docSelect.options[i].text === fileName) {
+              docSelect.selectedIndex = i;
+              break;
+            }
+          }
+        }
+
+        if (questionInput) {
+          const cleanSnippet = (snippet || "").replace(/^\.\.\.|\.\.\.$/g, "").trim();
+          questionInput.value = `Explain this passage from ${fileName}: "${cleanSnippet}"`;
+          questionInput.scrollIntoView({ behavior: "smooth", block: "center" });
+          questionInput.focus();
+        }
+      }
+
+      const searchInputEl = document.getElementById("searchQuery");
+      if (searchInputEl) {
+        searchInputEl.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            searchDocuments();
+          }
+        });
       }
 
       loadDocuments();

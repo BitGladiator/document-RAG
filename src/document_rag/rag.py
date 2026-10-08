@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+import re
 import chromadb
 from groq import Groq
 from sentence_transformers import SentenceTransformer
@@ -447,3 +448,188 @@ DOCUMENT EVIDENCE:
     raw_output = response.choices[0].message.content or ""
     parsed_json = _parse_verification_json(raw_output)
     return normalize_verification_data(parsed_json, valid_source_numbers)
+
+
+def create_snippet(text: str, query: str, max_chars: int = 280) -> str:
+    cleaned = " ".join(text.split())
+    if len(cleaned) <= max_chars:
+        return cleaned
+
+    query_lower = query.lower()
+    text_lower = cleaned.lower()
+
+    # 1. Search for full query phrase
+    pos = text_lower.find(query_lower)
+
+    # 2. If not found, look for first occurrence of substantial query terms
+    if pos == -1:
+        words = [w for w in re.findall(r"\w+", query_lower) if len(w) >= 3]
+        best_pos = -1
+        for w in words:
+            p = text_lower.find(w)
+            if p != -1 and (best_pos == -1 or p < best_pos):
+                best_pos = p
+        pos = best_pos
+
+    if pos == -1:
+        snippet = cleaned[:max_chars]
+        last_space = snippet.rfind(" ")
+        if last_space > int(max_chars * 0.7):
+            snippet = snippet[:last_space]
+        return snippet + "..."
+
+    half = max_chars // 2
+    start = max(0, pos - half)
+    end = min(len(cleaned), pos + half)
+
+    # Align start to word boundary
+    if start > 0:
+        next_space = cleaned.find(" ", start)
+        if next_space != -1 and next_space < pos:
+            start = next_space + 1
+
+    # Align end to word boundary
+    if end < len(cleaned):
+        prev_space = cleaned.rfind(" ", start, end)
+        if prev_space != -1 and prev_space > pos:
+            end = prev_space
+
+    snippet = cleaned[start:end].strip()
+    if start > 0:
+        snippet = "..." + snippet
+    if end < len(cleaned):
+        snippet = snippet + "..."
+
+    return snippet
+
+
+def search_documents(query: str, file_path: str = None, limit: int = 10) -> list[dict]:
+    query_str = str(query).strip()
+    if not query_str:
+        return []
+
+    try:
+        if collection.count() == 0:
+            return []
+    except Exception:
+        return []
+
+    query_embedding = embedding_model.encode(query_str).tolist()
+
+    candidate_k = min(max(limit * 3, 25), max(collection.count(), 1))
+
+    query_kwargs = {
+        "query_embeddings": [query_embedding],
+        "n_results": candidate_k,
+        "include": ["documents", "metadatas", "distances"]
+    }
+
+    if file_path:
+        clean_name = Path(str(file_path)).name
+        if "/" in str(file_path) or "\\" in str(file_path):
+            query_kwargs["where"] = {"file_path": str(file_path)}
+        else:
+            query_kwargs["where"] = {"file_name": clean_name}
+
+    try:
+        results = collection.query(**query_kwargs)
+    except Exception:
+        if file_path:
+            try:
+                query_kwargs["where"] = {"file_name": Path(str(file_path)).name}
+                results = collection.query(**query_kwargs)
+            except Exception:
+                return []
+        else:
+            return []
+
+    if not results or not results["documents"] or not results["documents"][0]:
+        return []
+
+    raw_docs = results["documents"][0]
+    raw_metas = results["metadatas"][0]
+    raw_dists = results["distances"][0]
+
+    query_terms = [w.lower() for w in re.findall(r"\w+", query_str) if len(w) >= 2]
+    query_phrase = query_str.lower()
+
+    candidates = []
+    for doc, meta, dist in zip(raw_docs, raw_metas, raw_dists):
+        # Cosine distance bounded roughly in [0, 2]
+        sim = max(0.0, 1.0 - (dist / 2.0))
+
+        # Lexical relevance boosting
+        doc_lower = doc.lower()
+        lex_score = 0.0
+        if query_phrase in doc_lower:
+            lex_score += 0.35
+        if query_terms:
+            matched_terms = sum(1 for t in query_terms if t in doc_lower)
+            lex_score += 0.25 * (matched_terms / len(query_terms))
+
+        final_score = min(1.0, (0.7 * sim) + min(0.3, lex_score))
+
+        candidates.append({
+            "text": doc,
+            "metadata": meta,
+            "distance": dist,
+            "score": round(final_score, 4)
+        })
+
+    # Sort candidates by combined score descending
+    candidates.sort(key=lambda x: x["score"], reverse=True)
+
+    # Deduplicate near-identical / overlapping chunks from the same document
+    selected = []
+    for cand in candidates:
+        cand_meta = cand["metadata"] or {}
+        cand_file = cand_meta.get("file_name") or cand_meta.get("file_path", "")
+        cand_chunk_idx = cand_meta.get("chunk_index")
+        cand_words = set(re.findall(r"\w+", cand["text"].lower()))
+
+        is_dup = False
+        for acc in selected:
+            acc_meta = acc["metadata"] or {}
+            acc_file = acc_meta.get("file_name") or acc_meta.get("file_path", "")
+            if acc_file != cand_file:
+                continue
+
+            acc_chunk_idx = acc_meta.get("chunk_index")
+            if cand_chunk_idx is not None and acc_chunk_idx is not None:
+                if abs(int(cand_chunk_idx) - int(acc_chunk_idx)) <= 1:
+                    acc_words = set(re.findall(r"\w+", acc["text"].lower()))
+                    overlap = len(cand_words & acc_words) / max(len(cand_words | acc_words), 1)
+                    if overlap > 0.4:
+                        is_dup = True
+                        break
+
+            acc_words = set(re.findall(r"\w+", acc["text"].lower()))
+            overlap = len(cand_words & acc_words) / max(len(cand_words | acc_words), 1)
+            if overlap > 0.65:
+                is_dup = True
+                break
+
+        if not is_dup:
+            selected.append(cand)
+            if len(selected) >= limit:
+                break
+
+    output = []
+    for item in selected:
+        meta = item["metadata"] or {}
+        raw_file = meta.get("file_name") or meta.get("file_path", "unknown")
+        file_name = Path(str(raw_file)).name
+        snippet = create_snippet(item["text"], query_str)
+
+        output.append({
+            "file_name": file_name,
+            "file_path": meta.get("file_path", file_name),
+            "file_type": meta.get("file_type") or Path(file_name).suffix.lower(),
+            "page_number": meta.get("page_number"),
+            "chunk_index": meta.get("chunk_index"),
+            "snippet": snippet,
+            "text": item["text"],
+            "score": item["score"]
+        })
+
+    return output

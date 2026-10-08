@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 from flask import Flask, jsonify, request, render_template, Response, stream_with_context, send_from_directory
-from .rag import ask_rag, ask_rag_stream, verify_answer
+from .rag import ask_rag, ask_rag_stream, verify_answer, search_documents
 from .memory import (
     add_interaction,
     get_history,
@@ -134,6 +134,51 @@ def verify():
         app.logger.error("Answer verification failed: %s", e)
         return jsonify({
             "error": "Unable to verify this answer. Please try again."
+        }), 500
+
+
+@app.post("/search")
+def search():
+
+    data = request.get_json()
+
+    if not data or "query" not in data or not str(data["query"]).strip():
+        return jsonify({
+            "error": "Missing or empty search query"
+        }), 400
+
+    query = str(data["query"]).strip()
+    raw_file = data.get("file_path") or None
+
+    safe_file_path = None
+    if raw_file:
+        clean_name = Path(str(raw_file)).name
+        if not clean_name or ".." in str(raw_file) or "\\" in str(raw_file):
+            return jsonify({
+                "error": "Invalid document selector"
+            }), 400
+        safe_file_path = str(raw_file)
+
+    limit = data.get("limit", 10)
+    try:
+        limit = max(1, min(int(limit), 50))
+    except (ValueError, TypeError):
+        limit = 10
+
+    try:
+        results = search_documents(
+            query=query,
+            file_path=safe_file_path,
+            limit=limit
+        )
+        return jsonify({
+            "query": query,
+            "results": results
+        })
+    except Exception as e:
+        app.logger.error("Search error: %s", e)
+        return jsonify({
+            "error": "Unable to search documents. Please try again."
         }), 500
 
 
